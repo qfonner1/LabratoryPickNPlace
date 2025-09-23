@@ -4,7 +4,7 @@ import numpy as np
 
 def main():
     # Path to your Panda XML
-    model_path = r"C:\MuJoCo\Project\franka_emika_panda\mjx_panda.xml"
+    model_path = "franka_emika_panda/mjx_panda.xml"
 
     # Load the MuJoCo model
     model = mujoco.MjModel.from_xml_path(model_path)
