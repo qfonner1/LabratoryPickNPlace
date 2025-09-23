@@ -1,0 +1,40 @@
+<mujoco model="panda_world">
+
+    <compiler angle="degree" coordinate="local"/>
+
+    <option timestep="0.002"/>
+
+    <default>
+        <geom type="box" rgba="0.8 0.6 0.4 1" condim="3"/>
+    </default>
+
+    <worldbody>
+        <!-- Top light -->
+        <light name="top" pos="0 0 2" mode="trackcom"/>
+
+        <!-- Ground plane -->
+        <geom type="plane" size="5 5 0.1" rgba="0.8 0.8 0.8 1"/>
+
+        <!-- Platform under robot -->
+        <body name="platform" pos="0 0 0.35">
+            <geom type="box" size="0.3 0.3 0.05" rgba="0.5 0.5 0.5 1"/>
+        </body>
+
+        <!-- Left table -->
+        <body name="table_left" pos="-0.6 0 0.4">
+            <geom type="box" size="0.2 0.4 0.4" rgba="0.6 0.3 0.1 1"/>
+        </body>
+
+        <!-- Right table -->
+        <body name="table_right" pos="0.6 0 0.4">
+            <geom type="box" size="0.2 0.4 0.4" rgba="0.6 0.3 0.1 1"/>
+        </body>
+
+        <!-- Test tube on left table -->
+        <body name="test_tube" pos="0.6 0 0.81">
+            <geom type="cylinder" size="0.02 0.08" rgba="0 1 0 1"/>
+        </body>
+
+    </worldbody>
+
+</mujoco>
