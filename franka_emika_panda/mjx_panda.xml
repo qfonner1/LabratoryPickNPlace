@@ -1,12 +1,15 @@
 <mujoco model="panda">
+
   <compiler angle="radian" meshdir="assets" autolimits="true"/>
 
   <default>
+
     <default class="panda">
       <material specular="0.5" shininess="0.25"/>
       <joint armature="0.1" damping="1" axis="0 0 1" range="-2.8973 2.8973"/>
       <general dyntype="none" biastype="affine" ctrlrange="-2.8973 2.8973" forcerange="-87 87"/>
       <position forcerange="-100 100"/>
+
       <default class="finger">
         <joint axis="0 1 0" type="slide" range="0 0.04"/>
       </default>
@@ -14,6 +17,7 @@
       <default class="visual">
         <geom type="mesh" contype="0" conaffinity="0" group="2"/>
       </default>
+
       <default class="collision">
         <geom group="3" type="mesh" contype="0" conaffinity="0"/>
         <default class="primitive_collision">
@@ -30,10 +34,15 @@
           </default>
           <default class="fingertip_pad_collision_4">
             <geom type="box" size="0.00875 0.0076 0.00825" pos="0 0.00758 0.04525" conaffinity="3"/>
+          
           </default>
+
         </default>
+
       </default>
+
     </default>
+
   </default>
 
   <asset>
@@ -158,6 +167,7 @@
       <geom mesh="link0_10" material="off_white" class="visual"/>
       <geom mesh="link0_11" material="white" class="visual"/>
       <geom mesh="link0_c" class="collision"/>
+      
       <body name="link1" pos="0 0 0.333">
         <inertial mass="4.970684" pos="0.003875 0.002081 -0.04762"
           fullinertia="0.70337 0.70661 0.0091170 -0.00013900 0.0067720 0.019169"/>
