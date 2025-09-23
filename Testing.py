@@ -2,6 +2,8 @@ import mujoco
 import mujoco.viewer
 import numpy as np
 
+#test 2
+
 def main():
     # Path to your Panda XML
     model_path = "franka_emika_panda/mjx_panda.xml"
