@@ -3,6 +3,7 @@ from mujoco.glfw import glfw
 import numpy as np
 import os
 import sim_utils
+import Functions
 
 xml_path = 'franka_panda_w_objs.xml'
 simend = 300
@@ -36,12 +37,7 @@ def controller(model, data):
     target_pos = box_pos + np.array([0.0, 0.0, 0.10])  # 10 cm above box
     R_box = data.xmat[target_body_id].reshape(3, 3)    # desired rotation
 
-    theta = np.pi / 2 
-    Rx = np.array([[1, 0, 0],[0, np.cos(theta), -np.sin(theta)],[0, np.sin(theta),  np.cos(theta)]])
-    R_box_rot = R_box @ Rx  
-    theta = -1*np.pi / 2 
-    Ry = np.array([[ np.cos(theta), 0, np.sin(theta)],[ 0,1,0],[-np.sin(theta), 0, np.cos(theta)]])
-    R_box_rot = R_box_rot @ Ry 
+    R_box_rot = R_box @ Functions.RotX(np.pi/2) @ Functions.RotY(-1*np.pi /2) 
 
     # --- 3) position error ---
     pos_err = target_pos - ee_pos 
