@@ -79,7 +79,11 @@ def controller(model, data):
     q_des = q + dq_step
 
     # --- 10) PD control + gravity compensation ---
+<<<<<<< HEAD
     Kp = 75.0
+=======
+    Kp = 200
+>>>>>>> master
     Kd = 10.0
     q_err = q_des - q
     qd = data.qvel[:nv].copy()
