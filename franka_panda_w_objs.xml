@@ -1,6 +1,6 @@
 <mujoco model="franka_panda">
     <compiler angle="radian" meshdir="" inertiagrouprange="0 0"/>
-    <option impratio="20" cone="elliptic" density="1.2" viscosity="0.00002"/>
+    <option gravity="0 0 -9.81" impratio="20" cone="elliptic" density="1.2" viscosity="0.00002"/>
     <size nconmax="5000" njmax="5000"/>
     
     <!-- panda assets-->
