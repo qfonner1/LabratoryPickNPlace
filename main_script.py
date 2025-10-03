@@ -7,7 +7,7 @@ from robot_controller import RobotController
 from task_sequence import TaskSequence
 
 xml_path = 'franka_panda_w_objs.xml'
-simend = 300
+simend = 500
 
 # Setup XML absolute path
 dirname = os.path.dirname(__file__)

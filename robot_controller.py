@@ -57,8 +57,8 @@ class RobotController:
         q_des[8] = gripper_targets["right"]
 
         # --- PD + Feedforward Torque ---
-        Kp = 200
-        Kd = 10 
+        Kp = 250
+        Kd = 20
         q_err = q_des - q
         qd = data.qvel[:nv].copy()
         f = data.qfrc_bias.copy()
