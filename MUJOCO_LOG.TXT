@@ -1,90 +1,9 @@
-Mon Sep 29 17:28:56 2025
-WARNING: Nan, Inf or huge value in QACC at DOF 13. The simulation is unstable. Time = 0.1700.
-
-Mon Sep 29 19:00:09 2025
-WARNING: Nan, Inf or huge value in QACC at DOF 12. The simulation is unstable. Time = 0.0940.
-
-Mon Sep 29 19:00:44 2025
-WARNING: Nan, Inf or huge value in QACC at DOF 12. The simulation is unstable. Time = 0.0940.
-
-Wed Oct  1 21:55:35 2025
+Tue Oct  7 14:43:15 2025
 ERROR: Python exception raised
 
-Wed Oct  1 21:55:39 2025
+Tue Oct  7 14:43:52 2025
 ERROR: Python exception raised
 
-Wed Oct  1 21:55:50 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:12:46 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:12:55 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:13:02 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:13:28 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:13:42 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:13:48 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:14:04 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:14:28 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:15:08 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:15:27 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:16:02 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:17:06 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:17:43 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:17:54 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:18:18 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:18:40 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:20:23 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:22:35 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:23:26 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:24:43 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:24:46 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:26:22 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:26:25 2025
-ERROR: Python exception raised
-
-Wed Oct  1 22:35:08 2025
+Wed Oct  8 22:21:51 2025
 ERROR: Python exception raised
 

@@ -68,7 +68,8 @@ cam.lookat = np.array([0.0, 0.0, 2.0])
 # Control callback
 def control_callback(model_, data_):
     ee_pos = data_.site_xpos[ee_site_id].copy()
-    target_pos, target_rot, gripper_targets, gripper_open = task_seq.get_target(model_, data_, ee_pos)
+    ee_rot = data_.site_xmat[ee_site_id].reshape(3,3) 
+    target_pos, target_rot, gripper_targets, gripper_open = task_seq.get_target(model_, data_, ee_pos, ee_rot)
     controller_obj.controller(model_, data_, target_pos, target_rot, gripper_targets, gripper_open)
 
 
