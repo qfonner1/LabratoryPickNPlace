@@ -7,3 +7,6 @@ ERROR: Python exception raised
 Wed Oct  8 22:21:51 2025
 ERROR: Python exception raised
 
+Tue Oct 14 17:02:35 2025
+WARNING: Nan, Inf or huge value in QACC at DOF 10. The simulation is unstable. Time = 11.3260.
+
