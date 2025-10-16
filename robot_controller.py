@@ -47,7 +47,7 @@ class RobotController:
             dq = J_full.T @ np.linalg.pinv(A) @ error
 
         # Clip joint velocity
-        max_dq_norm = 0.2
+        max_dq_norm = 0.5
         dq_norm = np.linalg.norm(dq)
         if dq_norm > max_dq_norm:
             dq *= max_dq_norm / dq_norm

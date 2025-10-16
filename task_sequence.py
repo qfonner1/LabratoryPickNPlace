@@ -14,7 +14,8 @@ class TaskSequence:
             {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]), "gripper": 1.0, "wait": 0.5},
             {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]), "gripper": 1.0, "wait": 0.5},
             {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]), "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "gripper": 0.0, "wait": 1.0}
+            {"target_id": "box", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "gripper": 0.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2), "gripper": 0.0, "wait": 1.0}
         ]
 
         self.current_step = 0
@@ -37,15 +38,19 @@ class TaskSequence:
         # --- Determine base position ---
         if target_type == "static" and self.grasped_pos is not None:
             base_pos = self.grasped_pos.copy()
+        elif target_type == "absolute":
+            base_pos = step.get("pos").copy()
         else:
             body_id = self.id_map.get(step.get("target_id"), None)
             base_pos = data.xpos[body_id].copy() if body_id is not None else ee_pos.copy()
 
-        target_pos = base_pos + offset
+        target_pos = base_pos + (offset if target_type != "absolute" else 0)
 
         # --- Determine target rotation  ---
         if target_type == "static":
             target_rot = F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2)
+        elif target_type == "absolute":
+            target_rot = step.get("rot").copy()
         else:
             body_id = self.id_map.get(step.get("target_id"), None)
             if body_id is not None:
