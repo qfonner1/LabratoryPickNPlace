@@ -37,7 +37,7 @@ task_seq = TaskSequence(model)  # body IDs handled internally
 if not glfw.init():
     raise RuntimeError("Failed to initialize GLFW")
 
-window = glfw.create_window(1200, 900, "MuJoCo Demo", None, None)
+window = glfw.create_window(1200, 900, "Go Get it Buddy!", None, None)
 if not window:
     glfw.terminate()
     raise RuntimeError("Failed to create GLFW window")
