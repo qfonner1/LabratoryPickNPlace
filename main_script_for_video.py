@@ -54,10 +54,10 @@ scene = mj.MjvScene(model, maxgeom=10000)
 context = mj.MjrContext(model, mj.mjtFontScale.mjFONTSCALE_150.value)
 
 # Camera initial position
-cam.azimuth = 89.6
+cam.azimuth = 90
 cam.elevation = -11.6
-cam.distance = 5.0
-cam.lookat = np.array([0.0, 0.0, 2.0])
+cam.distance = 6.0
+cam.lookat = np.array([1.2, 0.0, 2.0])
 
 # --- Offscreen Renderer Setup ---
 renderer = mj.Renderer(model, width=640, height=480)

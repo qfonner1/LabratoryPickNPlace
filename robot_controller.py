@@ -72,12 +72,17 @@ class RobotController:
         tau[arm_idx] += Kp_arm * q_err[arm_idx] + Kd_arm * (-qd[arm_idx])
         tau[gripper_idx] += Kp_grip * q_err[gripper_idx] + Kd_grip * (-qd[gripper_idx])
 
-        # --- Smooth object mass compensation ---
-        if not self.object_grasped_flag and gripper_open == 0.0:
-            self.object_grasped_flag = True
-
-        if self.object_grasped_flag:
+        if gripper_open == 0.0:  # gripper closed -> object grasped
+            if not self.object_grasped_flag:
+                self.object_grasped_flag = True
             self.mass_blend = min(self.mass_blend + 0.01, 1.0)
+        else:  # gripper open -> object released
+            if self.object_grasped_flag:
+                self.object_grasped_flag = False
+            self.mass_blend = max(self.mass_blend - 0.01, 0.0)
+
+        # Apply mass compensation only if mass_blend > 0
+        if self.mass_blend > 0:
             object_mass = 0.01  # kg
             gravity = model.opt.gravity
             wrench = np.hstack((object_mass * gravity, np.zeros(3)))

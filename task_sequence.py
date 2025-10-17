@@ -14,37 +14,37 @@ class TaskSequence:
 
         self.steps = [
             {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]),                                                  "gripper": 1.0, "wait": 1.0},
-            {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
+            {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
             {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 0.0, "wait": 1.0},
             {"target_id": "box", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
-            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 0.5, "pos_tol": "loose"},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0.2, 1.25]),  "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),  "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box", "target_type": "absolute", "pos": np.array([0.9, 0.2, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box", "target_type": "absolute", "pos": np.array([0.9, 0.2, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
             {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0.2, 1.35]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),      "gripper": 1.0, "wait": 1.0},
 
-            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 1.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 1.0, "wait": 0.5, "pos_tol": "loose"},
             {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]),                                                  "gripper": 1.0, "wait": 1.0},
-            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
+            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
             {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 0.0, "wait": 1.0},
             {"target_id": "box2", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
-            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 0.5, "pos_tol": "loose"},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0, 1.25]),    "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),  "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box2", "target_type": "absolute", "pos": np.array([0.9, 0.0, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box2", "target_type": "absolute", "pos": np.array([0.9, 0.0, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
             {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0, 1.35]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),      "gripper": 1.0, "wait": 1.0},
 
-            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 1.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 1.0, "wait": 0.5, "pos_tol": "loose"},
             {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]),                                                  "gripper": 1.0, "wait": 1.0},
-            {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
+            {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
             {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 0.0, "wait": 1.0},
             {"target_id": "box3", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
-            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 1.0},
-            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.85, -0.18, 1.25]),    "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),  "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box3", "target_type": "absolute", "pos": np.array([0.85, -0.18, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 0.5, "pos_tol": "loose"},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.75, -0.2, 1.25]),    "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),  "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box3", "target_type": "absolute", "pos": np.array([0.75, -0.2, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
             {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
-            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.85, -0.18, 1.35]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),      "gripper": 1.0, "wait": 1.0},
-            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, 0.0, 2.23]), "rot": np.eye(3,3),                      "gripper": 0.0, "wait": 1.0}
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.75, -0.2, 1.35]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),      "gripper": 1.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, 0.0, 2.23]), "rot": np.eye(3,3),                      "gripper": 0.0, "wait": 0.5, "pos_tol": "loose"}
         ]
 
         self.current_step = 0
@@ -100,7 +100,15 @@ class TaskSequence:
             angle_rad = np.arccos(np.clip((np.trace(R_diff) - 1) / 2, -1.0, 1.0))
             angle_deg = np.degrees(angle_rad)
 
-            if dist < 0.03 and angle_deg < 5.0:
+            tolerance_type = step.get("pos_tol")
+            if tolerance_type == "tight":
+                pos_tol = 0.01
+            elif tolerance_type == "loose":
+                pos_tol = 0.1
+            else:
+                pos_tol = 0.03
+
+            if dist < pos_tol and angle_deg < 5.0:
                 if self.current_step + 1 < len(self.steps):
                     next_step = self.steps[self.current_step + 1]
                     if next_step.get("target_type") == "static":
