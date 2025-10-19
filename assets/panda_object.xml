@@ -9,7 +9,7 @@
         <geom 
           name="obj_box_06" 
           type="box" 
-          size="0.03 0.03 0.05" 
+          size="0.025 0.025 0.1" 
           solimp="0.998 0.998 0.001" 
           solref="0.001 1" 
           density="1000" 
