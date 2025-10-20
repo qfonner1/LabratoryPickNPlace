@@ -1,5 +1,5 @@
 import numpy as np
-import Functions as F  # Ensure RotX, RotY, RotZ, axang_to_rot are defined
+import Functions as F 
 
 class TaskSequence:
     def __init__(self, model):
@@ -50,6 +50,8 @@ class TaskSequence:
         self.current_step = 0
         self.waiting = False
         self.wait_timer = 0.0
+        self.reset()
+        self.active = True  # Only process steps when active
 
 
     def get_target(self, model, data, ee_pos, ee_rot=None):
@@ -134,11 +136,19 @@ class TaskSequence:
         angle_rad = np.arccos(np.clip((np.trace(R_diff) - 1) / 2, -1.0, 1.0))
         angle_deg = np.degrees(angle_rad)
         print(f"Step {self.current_step} | EE Pos: [{', '.join(f'{x:.3f}' for x in ee_pos)}] "
-              f"| Target Pos: [{', '.join(f'{x:.3f}' for x in target_pos)}] "
-              f"| Dist: {dist:.3f} | Angle Diff: {angle_deg:.2f}°", flush=True)
+            f"| Target Pos: [{', '.join(f'{x:.3f}' for x in target_pos)}] "
+            f"| Dist: {dist:.3f} | Angle Diff: {angle_deg:.2f}°", flush=True)
 
         return target_pos, target_rot, gripper_targets, gripper_open
 
     def advance_step(self):
         if self.current_step < len(self.steps) - 1:
             self.current_step += 1
+
+    def reset(self):
+        self.current_step = 0
+        self.waiting = False
+        self.wait_timer = 0.0
+        self.grasped_pos = None
+        self.grasped_rot = None
+

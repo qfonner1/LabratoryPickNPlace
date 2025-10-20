@@ -1,6 +1,5 @@
 import numpy as np
 import mujoco as mj
-import Functions as F
 
 class RobotController:
     def __init__(self, ee_site_id, model):
