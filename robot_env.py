@@ -65,8 +65,6 @@ class RobotEnv:
         reward, done, info = self._compute_reward_done()
         return obs, reward, done, info
 
-
-
     def _get_obs(self):
         return {
             "qpos": self.data.qpos.copy(),
@@ -81,7 +79,6 @@ class RobotEnv:
         if self.viewer is not None:
             self.viewer.sync()
 
-
     def _compute_reward_done(self):
         done = self.task_seq.current_step >= len(self.task_seq.steps) and not self.task_seq.waiting
         reward = 1.0 if done else 0.0
@@ -93,3 +90,10 @@ class RobotEnv:
             self.viewer = None
         # Stop sequence from running
         self.task_seq.active = False
+
+    def get_body_names(self,prefix='',excluding='world'):
+        """
+            Get body names with prefix
+        """
+        body_names = [x for x in self.body_names if x is not None and x.startswith(prefix) and excluding not in x]
+        return body_names
