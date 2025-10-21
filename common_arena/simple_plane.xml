@@ -36,7 +36,7 @@
     </body>
 
     <!-- Standing cam view (Mirrored Version) -->
-    <camera pos="-2.55 0 2.25" name="standing_cam2" xyaxes="0.000 -1.000 -0.000 0.618 0.000 0.786"/>
+    <camera pos="-2.55 0 2.25" name="standing_cam2" fovy="45" xyaxes="0.000 -1.000 -0.000 0.618 0.000 0.786"/>
 
 
 

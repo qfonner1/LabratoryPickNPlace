@@ -3,7 +3,7 @@ import mujoco.viewer
 import os
 from robot_controller import RobotController
 from task_sequence import TaskSequence
-
+import numpy as np
 class RobotEnv:
     def __init__(self, xml_path, render_mode="human"):
         self.xml_path = os.path.abspath(xml_path)
@@ -97,3 +97,66 @@ class RobotEnv:
         """
         body_names = [x for x in self.body_names if x is not None and x.startswith(prefix) and excluding not in x]
         return body_names
+    
+    def get_camera_pose(self, cam_body_name):
+        body_id = self.model.body(cam_body_name).id
+        pos = self.data.xpos[body_id].copy()
+        rot = self.data.xmat[body_id].reshape(3, 3).copy()
+        return pos, rot
+    def render_egocentric_rgbd_image(self, p_cam, R_cam, width=256, height=256, fovy=45.0):
+
+        # Ensure inputs are numpy arrays
+        p_cam = np.array(p_cam)
+        R_cam = np.array(R_cam)
+
+        # Create renderer with size
+        renderer = mj.Renderer(self.model, height=height, width=width)
+
+        # Setup camera
+        camera = mj.MjvCamera()
+        camera.type = mj.mjtCamera.mjCAMERA_FREE
+
+        # Assign camera position, lookat, and up vectors element-wise
+        for i in range(3):
+            camera.pos[i] = p_cam[i]
+            camera.lookat[i] = p_cam[i] + R_cam[i, 2]  # forward = z-axis
+            camera.up[i] = R_cam[i, 1]                  # up = y-axis
+
+        # Setup rendering options
+        option = mj.MjvOption()
+
+        # Update the scene with this camera pose
+        mj.mjv_updateScene(
+            self.model,
+            self.data,
+            option,
+            None,
+            camera,
+            mj.mjtCatBit.mjCAT_ALL,
+            renderer.scene
+        )
+
+        # Render and read pixels
+        renderer.render()
+        rgb_img, depth_ndc = renderer.read_pixels(depth=True)
+
+        # Convert NDC depth to meters
+        extent = self.model.stat.extent
+        near = self.model.vis.map.znear * extent
+        far = self.model.vis.map.zfar * extent
+        depth_img = near / (1.0 - depth_ndc * (1.0 - near / far))
+
+        # Free renderer resources
+        renderer.free()
+
+        return rgb_img, depth_img
+
+
+    def get_camera_pose(self, cam_body_name):
+        body_id = self.model.body(cam_body_name).id
+        pos = self.data.xpos[body_id].copy()
+        rot = self.data.xmat[body_id].reshape(3, 3).copy()
+        return pos, rot
+
+
+    
