@@ -1,64 +1,67 @@
 <mujocoinclude>
-    <worldbody>
-        <body name="obj_box_06" pos="-0.9 0.0 1.2">
-                <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
-                <geom name="box_geom" type="box" size="0.015 0.015 0.1"
-                    contype="1" conaffinity="1"
-                    solimp="0.9 0.95 0.001" solref="0.001 1"
-                    friction="1 0.005 0.0001"
-                    rgba="0.0 0.7 0.5 1"/>
-                <joint name="box_joint" type="free" damping="0.0005"/>
-        </body>
+  <worldbody>
 
-        <body name="obj_box_07" pos="-0.75 0.2 1.2">
-                <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
-                <geom name="box_geom2" type="box" size="0.015 0.015 0.1"
-                    contype="1" conaffinity="1"
-                    solimp="0.9 0.95 0.001" solref="0.001 1"
-                    friction="1 0.005 0.0001"
-                    rgba="0.0 0.7 0.5 1"/>
-                <joint name="box_joint2" type="free" damping="0.0005"/>
-        </body>
+    <!-- Overhead camera looking straight down -->
+    
+    <body name="obj_box_06" pos="0.9 0.0 1.2">
+      <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
+      <geom name="box_geom" type="box" size="0.015 0.015 0.1"
+            contype="1" conaffinity="1"
+            solimp="0.9 0.95 0.001" solref="0.001 1"
+            friction="1 0.005 0.0001"
+            rgba="1 0 0 1"/>
+      <joint name="box_joint" type="free" damping="0.0005"/>
+    </body>
 
-        <body name="obj_box_08" pos="-0.9 -0.2 1.2">
-                <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
-                <geom name="box_geom3" type="box" size="0.015 0.015 0.1"
-                    contype="1" conaffinity="1"
-                    solimp="0.9 0.95 0.001" solref="0.001 1"
-                    friction="1 0.005 0.0001"
-                    rgba="0.0 0.7 0.5 1"/>
-                <joint name="box_joint3" type="free" damping="0.0005"/>
-        </body>
+    <body name="obj_box_07" pos="0.75 0.1 1.2">
+      <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
+      <geom name="box_geom2" type="box" size="0.015 0.015 0.1"
+            contype="1" conaffinity="1"
+            solimp="0.9 0.95 0.001" solref="0.001 1"
+            friction="1 0.005 0.0001"
+            rgba="1 0 0 1"/>
+      <joint name="box_joint2" type="free" damping="0.0005"/>
+    </body>
 
-        <body name="target1" pos="0.9 0.2 1.05">
-                <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
-                <geom name="target1_geom" type="box" size="0.015 0.015 0.0005" 
-                    contype="1" conaffinity="1"
-                    solimp="0.9 0.95 0.001" solref="0.001 1"
-                    friction="1 0.005 0.0001"
-                    rgba="1 0.0 0.0 1"/>
-                <joint name="target1_joint" type="free" damping="0.0005"/>
-        </body>
+    <body name="obj_box_08" pos="0.9 -0.1 1.2">
+      <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
+      <geom name="box_geom3" type="box" size="0.015 0.015 0.1"
+            contype="1" conaffinity="1"
+            solimp="0.9 0.95 0.001" solref="0.001 1"
+            friction="1 0.005 0.0001"
+            rgba="1 0 0 1"/>
+      <joint name="box_joint3" type="free" damping="0.0005"/>
+    </body>
 
-        <body name="target2" pos="0.9 0.0 1.05">
-                <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
-                <geom name="target2_geom" type="box" size="0.015 0.015 0.0005" 
-                    contype="1" conaffinity="1"
-                    solimp="0.9 0.95 0.001" solref="0.001 1"
-                    friction="1 0.005 0.0001"
-                    rgba="1 0.0 0.0 1"/>
-                <joint name="target2_joint" type="free" damping="0.0005"/>
-        </body>
+    <body name="target1" pos="-0.9 0.2 1.05">
+      <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
+      <geom name="target1_geom" type="box" size="0.015 0.015 0.0005" 
+            contype="1" conaffinity="1"
+            solimp="0.9 0.95 0.001" solref="0.001 1"
+            friction="1 0.005 0.0001"
+            rgba="1 0.0 0.0 1"/>
+      <joint name="target1_joint" type="free" damping="0.0005"/>
+    </body>
 
-        <body name="target3" pos="0.75 -0.2 1.05">
-                <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
-                <geom name="target3_geom" type="box" size="0.015 0.015 0.0005" 
-                    contype="1" conaffinity="1"
-                    solimp="0.9 0.95 0.001" solref="0.001 1"
-                    friction="1 0.005 0.0001"
-                    rgba="1 0.0 0.0 1"/>
-                <joint name="target3_joint" type="free" damping="0.0005"/>
-        </body> 
+    <body name="target2" pos="-0.9 0.0 1.05">
+      <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
+      <geom name="target2_geom" type="box" size="0.015 0.015 0.0005" 
+            contype="1" conaffinity="1"
+            solimp="0.9 0.95 0.001" solref="0.001 1"
+            friction="1 0.005 0.0001"
+            rgba="1 0.0 0.0 1"/>
+      <joint name="target2_joint" type="free" damping="0.0005"/>
+    </body>
 
-    </worldbody>
+    <body name="target3" pos="-0.75 -0.2 1.05">
+      <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
+      <geom name="target3_geom" type="box" size="0.015 0.015 0.0005" 
+            contype="1" conaffinity="1"
+            solimp="0.9 0.95 0.001" solref="0.001 1"
+            friction="1 0.005 0.0001"
+            rgba="1 0.0 0.0 1"/>
+      <joint name="target3_joint" type="free" damping="0.0005"/>
+    </body> 
+
+  </worldbody>
 </mujocoinclude>
