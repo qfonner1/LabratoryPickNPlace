@@ -58,3 +58,6 @@ WARNING: Nan, Inf or huge value in QACC at DOF 30. The simulation is unstable. T
 Mon Oct 20 22:47:04 2025
 WARNING: Nan, Inf or huge value in QACC at DOF 30. The simulation is unstable. Time = 0.0360.
 
+Wed Oct 22 10:35:47 2025
+ERROR: mjv_cameraInModel: mjvScene frustum_near too small
+
