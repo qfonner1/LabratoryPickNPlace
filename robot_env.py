@@ -98,11 +98,6 @@ class RobotEnv:
         body_names = [x for x in self.body_names if x is not None and x.startswith(prefix) and excluding not in x]
         return body_names
     
-    def get_camera_pose(self, cam_body_name):
-        body_id = self.model.body(cam_body_name).id
-        pos = self.data.xpos[body_id].copy()
-        rot = self.data.xmat[body_id].reshape(3, 3).copy()
-        return pos, rot
     def render_egocentric_rgbd_image(self, p_cam, R_cam, width=256, height=256, fovy=45.0):
 
         # Ensure inputs are numpy arrays
