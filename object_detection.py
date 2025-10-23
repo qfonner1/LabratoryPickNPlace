@@ -387,5 +387,3 @@ def object_detection(xml_path, cam_name):
 
     return results_by_color_shifted
 
-
-print(object_detection("franka_panda_w_objs.xml", "overhead_cam"))

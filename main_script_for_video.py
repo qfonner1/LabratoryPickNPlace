@@ -2,10 +2,10 @@ import mujoco as mj
 from mujoco.glfw import glfw
 import numpy as np
 import os
-import sim_utils
 import imageio
 from robot_controller import RobotController
 from task_sequence import TaskSequence
+import object_detection as OD
 
 xml_path = 'franka_panda_w_objs.xml'
 simend = 500  # seconds
@@ -32,6 +32,9 @@ ee_site_id = model.site(ee_site_name).id
 # Initialize controller and task sequence
 controller_obj = RobotController(ee_site_id, model)
 task_seq = TaskSequence(model)
+
+detected_objects = OD.object_detection("franka_panda_w_objs.xml", "overhead_cam")
+task_seq.set_targets_from_vision(detected_objects)
 
 # Initialize GLFW
 if not glfw.init():

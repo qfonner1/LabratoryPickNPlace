@@ -3,46 +3,41 @@ import Functions as F
 
 class TaskSequence:
     def __init__(self, model):
-        self.id_map = {
-            "box2": model.body("obj_box_06").id,
-            "box3": model.body("obj_box_07").id,
-            "box": model.body("obj_box_08").id
-        }
-
         self.grasped_pos = None
         self.grasped_rot = None
+        self.targets = {} 
 
         self.steps = [
-            {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]),                                                  "gripper": 1.0, "wait": 1.0},
-            {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
-            {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box0", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]),"rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 1.0, "wait": 1.0},
+            {"target_id": "box0", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),  "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2),  "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+            {"target_id": "box0", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),    "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2),   "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box0", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 0.5, "pos_tol": "loose"},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0.2, 1.25]),  "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),  "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box", "target_type": "absolute", "pos": np.array([0.9, 0.2, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
-            {"target_id": "box", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0.2, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+            {"target_id":  None, "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),  "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2), "gripper": 1.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0.2, 1.35]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),      "gripper": 1.0, "wait": 1.0},
 
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 1.0, "wait": 0.5, "pos_tol": "loose"},
-            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]),                                                  "gripper": 1.0, "wait": 1.0},
-            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
-            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box2", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box1", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2),  "gripper": 1.0, "wait": 1.0},
+            {"target_id": "box1", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),  "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2),   "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+            {"target_id": "box1", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),    "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2),   "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box1", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 0.5, "pos_tol": "loose"},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0, 1.25]),    "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),  "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box2", "target_type": "absolute", "pos": np.array([0.9, 0.0, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
-            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0.0, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+            {"target_id":  None, "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),   "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),    "gripper": 1.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.9, 0, 1.35]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),      "gripper": 1.0, "wait": 1.0},
 
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 1.0, "wait": 0.5, "pos_tol": "loose"},
-            {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]),                                                  "gripper": 1.0, "wait": 1.0},
-            {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
-            {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box3", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.15]),  "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2),     "gripper": 1.0, "wait": 1.0},
+            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),   "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2),     "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+            {"target_id": "box2", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),      "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2),      "gripper": 0.0, "wait": 1.0},
+            {"target_id": "box2", "target_type": "static", "offset": np.array([0.0, 0.0, 0.15]), "rot": F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2), "gripper": 0.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, -0.9, 1.25]), "rot": F.RotX(np.pi / 2),                      "gripper": 0.0, "wait": 0.5, "pos_tol": "loose"},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.75, -0.2, 1.25]),    "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),  "gripper": 0.0, "wait": 1.0},
-            {"target_id": "box3", "target_type": "absolute", "pos": np.array([0.75, -0.2, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
-            {"target_id": "box3", "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),                                                   "gripper": 1.0, "wait": 1.0},
+            {"target_id":  None, "target_type": "absolute", "pos": np.array([0.75, -0.2, 1.18]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+            {"target_id":  None, "target_type": "live", "offset": np.array([0.0, 0.0, 0.0]),    "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),   "gripper": 1.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.75, -0.2, 1.35]), "rot": F.RotX(np.pi / 2) @ F.RotY(np.pi / 2),      "gripper": 1.0, "wait": 1.0},
             {"target_id":  None, "target_type": "absolute", "pos": np.array([0.0, 0.0, 2.23]), "rot": np.eye(3,3),                      "gripper": 0.0, "wait": 0.5, "pos_tol": "loose"}
         ]
@@ -54,6 +49,27 @@ class TaskSequence:
         self.active = True  # Only process steps when active
 
 
+    def set_targets_from_vision(self, detected_objects):
+        """
+        Assign detected objects to box0, box1, box2, ... dynamically.
+        detected_objects: dict with keys = colors or classes,
+                        values = list of np arrays of detected positions.
+        """
+        self.targets = {}
+        box_index = 0
+
+        # Flatten all detected points from all classes into one list
+        for obj_class, points in detected_objects.items():
+            for p in points:
+                key = f"box{box_index}"
+                self.targets[key] = [p.tolist() if isinstance(p, np.ndarray) else p]
+                box_index += 1
+
+        print("[TaskSequence] Updated targets from vision:")
+        for key, pts in self.targets.items():
+            for i, p in enumerate(pts):
+                print(f"  {key}[{i}] -> {p}")
+    
     def get_target(self, model, data, ee_pos, ee_rot=None):
         if ee_rot is None:
             ee_rot = np.eye(3)
@@ -73,21 +89,20 @@ class TaskSequence:
         elif target_type == "absolute":
             base_pos = step.get("pos").copy()
         else:
-            body_id = self.id_map.get(step.get("target_id"), None)
-            base_pos = data.xpos[body_id].copy() if body_id is not None else ee_pos.copy()
+            target_id = step.get("target_id")
+            if target_id and target_id in self.targets and len(self.targets[target_id]) > 0:
+                base_pos = np.array(self.targets[target_id][0])  # take first detection for that box
+            else:
+                base_pos = ee_pos.copy()
+
 
         target_pos = base_pos + (offset if target_type != "absolute" else 0)
 
         # --- Determine target rotation  ---
-        if target_type in ["static", "absolute"]:
+        if target_type in ["static", "absolute","live"]:
             target_rot = step.get("rot").copy()
         else:
-            body_id = self.id_map.get(step.get("target_id"), None)
-            if body_id is not None:
-                R_base = data.xmat[body_id].reshape(3, 3)
-                target_rot = R_base @ F.RotX(np.pi / 2) @ F.RotY(-np.pi / 2)
-            else:
-                target_rot = ee_rot.copy()
+            print("error")
 
 
         if self.waiting:
