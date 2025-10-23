@@ -7,12 +7,6 @@ from robot_env import RobotEnv
 env = RobotEnv("franka_panda_w_objs.xml", render_mode="human")
 obs = env.reset()
 
-
-
-
-
-
-
 # ------------------------------
 # Simulation loop
 # ------------------------------
