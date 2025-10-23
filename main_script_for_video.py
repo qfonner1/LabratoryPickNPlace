@@ -43,7 +43,7 @@ if not window:
     raise RuntimeError("Failed to create GLFW window")
 
 glfw.make_context_current(window)
-glfw.swap_interval(1)  # enable vsync
+glfw.swap_interval(1) 
 
 # --- Main viewer camera ---
 cam = mj.MjvCamera()
@@ -59,10 +59,11 @@ cam.elevation = -12
 cam.distance = 5.0
 cam.lookat = np.array([0.0, 0.0, 0.0])
 
-# --- Offscreen renderers for standing cameras ---
+# --- Offscreen renderers (reuse, don't recreate) ---
 width, height = 640, 480
-renderer_cam1 = mj.Renderer(model, width=width, height=height)
-renderer_cam2 = mj.Renderer(model, width=width, height=height)
+renderer1 = mj.Renderer(model, width=width, height=height)
+renderer2 = mj.Renderer(model, width=width, height=height)
+renderer3 = mj.Renderer(model, width=width, height=height)
 
 frames = []  # to store combined frames
 
@@ -103,6 +104,16 @@ cam_custom3.distance = 3.0                        # distance from lookat
 cam_custom3.azimuth = 90                          # +X side
 cam_custom3.elevation = -20                        # slight downward tilt
 
+renderer1 = mj.Renderer(model, width=width, height=height)
+renderer2 = mj.Renderer(model, width=width, height=height)
+renderer3 = mj.Renderer(model, width=width, height=height)
+
+def render_camera(camera_name):
+    renderer_tmp = mj.Renderer(model, width=width, height=height)
+    renderer_tmp.update_scene(data, camera=camera_name)
+    rgb = renderer_tmp.render()
+    renderer_tmp.close()
+    return rgb
 
 # --- Simulation loop ---
 while not glfw.window_should_close(window):
@@ -121,14 +132,6 @@ while not glfw.window_should_close(window):
     glfw.swap_buffers(window)
     glfw.poll_events()
 
-        # --- Capture standing cameras safely (clean reinit each render) ---
-    def render_camera(camera_name):
-        renderer_tmp = mj.Renderer(model, width=width, height=height)
-        renderer_tmp.update_scene(data, camera=camera_name)
-        rgb = renderer_tmp.render()
-        renderer_tmp.close()
-        return rgb
-
     rgb1 = render_camera(cam_custom1)
     rgb2 = render_camera(cam_custom2)
     rgb3 = render_camera(cam_custom3)
@@ -139,8 +142,10 @@ while not glfw.window_should_close(window):
 
 # --- Cleanup ---
 glfw.terminate()
-renderer_cam1.close()
-renderer_cam2.close()
+renderer1.close()
+renderer2.close()
+renderer3.close()
+
 
 # --- Save recorded video ---
 output_path = os.path.join(dirname, "simulation_standingcams.mp4")
