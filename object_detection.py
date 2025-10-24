@@ -288,7 +288,7 @@ def object_detection(xml_path, cam_name):
             XY1 /= XY1[2]
             print(f"Image corner {i}: pixel {pt} → world {XY1[:2]}")
 
-        print("✅  Homography calibration successful.")
+        print("Homography calibration successful.")
         return H
 
 
