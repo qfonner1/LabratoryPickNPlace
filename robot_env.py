@@ -28,13 +28,32 @@ class RobotEnv:
         self.active = True  # <--- Add this
 
     def reset(self):
-        mj.mj_resetData(self.model, self.data)   # reset simulation
-        self.task_seq.reset()                     # reset sequence
-        # reset controller state
+        # Reset simulation state (positions + velocities) to initial XML
+        mj.mj_resetData(self.model, self.data)
+        self.task_seq.reset()
+
+        # Reset controller state
         self.controller.tau_prev = None
         self.controller.mass_blend = 0.0
         self.controller.object_grasped_flag = False
+
+        # ----------------------------------------------------
+        # ✅ Only change the robot joints — leave object poses alone
+        # ----------------------------------------------------
+        # Copy current qpos so we only modify part of it
+        qpos = self.data.qpos.copy()
+
+        # Example Panda "home" configuration (7 DOF)
+        qpos[:7] = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+        # Assign it back (this preserves object states)
+        self.data.qpos[:] = qpos
+
+        # Recompute derived quantities
+        mj.mj_forward(self.model, self.data)
+
         return self._get_obs()
+
 
 
     def step(self, action=None):

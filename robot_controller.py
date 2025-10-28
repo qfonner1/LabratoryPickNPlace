@@ -45,6 +45,28 @@ class RobotController:
         except np.linalg.LinAlgError:
             dq = J_full.T @ np.linalg.pinv(A) @ error
 
+        # --- Controller Barrier Function (CBF) to avoid forbidden region ---
+        forbidden_center = np.array([0.0, 0.0, 1.3])  # Sphere center (m)
+        forbidden_radius = 0.4  # (m)
+        alpha_cbf = 5.0          # Gain for barrier function
+
+        diff = ee_pos - forbidden_center
+        h_val = np.dot(diff, diff) - forbidden_radius**2
+        a = 2 * (diff.T @ Jp)  # shape (nv,)
+
+        # Smooth activation margin
+        distance = np.sqrt(np.dot(diff, diff))
+        margin = 0.05
+        if distance < (forbidden_radius + margin):
+            b = alpha_cbf * h_val
+            a_norm = np.dot(a, a)
+            if a_norm > 1e-8:
+                violation = a @ dq + b
+                if violation < 0:
+                    # Project dq to nearest feasible
+                    dq = dq - (violation / a_norm) * a
+
+
         # Clip joint velocity
         max_dq_norm = 0.5
         dq_norm = np.linalg.norm(dq)
