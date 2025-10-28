@@ -16,6 +16,10 @@ env.model.opt.integrator = 1  # Runge-Kutta 4
 
 env.task_seq.set_boxes_from_vision(detected_objects)
 env.task_seq.set_targets_from_vision(detected_targets)
+
+# Generate dynamic steps based on current EE position
+ee_pos = env.get_ee_position()  # <-- You need a method that returns EE position
+env.task_seq.generate_steps(ee_pos)
 print("[TaskSequence] Targets updated from vision!")
 
 obs = env.reset()
