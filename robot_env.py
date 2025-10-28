@@ -92,6 +92,9 @@ class RobotEnv:
             "ee_rot": self.data.site_xmat[self.ee_site_id].reshape(3, 3).copy(),
             "step_idx": self.task_seq.current_step,
         }
+    def get_ee_position(self):
+            ee_site_id = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_SITE, "ee_site")
+            return np.array(self.data.site_xpos[ee_site_id])
     
     def render(self):
         """Render the current frame in human mode."""
