@@ -13,8 +13,8 @@ obstacle_list = [
     (-0.9, 0.0, 0.0, 0.2, 0.4, 0.04),   # left table box
     (0.9, 0.0, 0.0, 0.2, 0.4, 0.04),    # right table box
     (0.0, 0.0, 0.5, 0.2, 0.38, 2.0),     # central robot column
-    (0.0,0.5,1.1, 0.2, 0.2, 0.2),
-    (0.0,-0.5,1.1, 0.2, 0.2, 0.2),
+    (0.0,0.7,1.1, 0.2, 0.3, 0.2),
+    (0.0,-0.7,1.1, 0.2, 0.3, 0.2),
 ]
 
 rand_area = [-1, 1]
@@ -46,6 +46,9 @@ class RRTStar3D:
         self.max_iter = max_iter
         self.robot_radius = robot_radius
         self.obstacle_list = obstacle_list
+        self.z_preference_weight = 5.0  # Higher = stronger bias toward keeping Z constant
+        self.z_preferred = None         # to be set when planning starts
+
 
     # ---------------- Main Planning ----------------
     def planning(self, start=None, goal=None):
@@ -54,6 +57,9 @@ class RRTStar3D:
         if goal is not None:
             self.end = Node(*goal)
         self.node_list = [self.start]
+
+        # Prefer staying near average start/goal height
+        self.z_preferred = 0.5 * (self.start.z + self.end.z)
 
         for i in range(self.max_iter):
             rnd = self.get_random_node()
@@ -80,19 +86,20 @@ class RRTStar3D:
         extend_length = min(extend_length, d)
         n_expand = math.floor(extend_length / self.path_resolution)
 
+        # --- Penalize large pitch angles (Z changes) ---
+        z_penalty = 1.0 + self.z_preference_weight * abs(math.sin(pitch))
+        effective_step = self.path_resolution / z_penalty
+
         for _ in range(n_expand):
-            new_node.x += self.path_resolution * math.cos(yaw) * math.cos(pitch)
-            new_node.y += self.path_resolution * math.sin(yaw) * math.cos(pitch)
-            new_node.z += self.path_resolution * math.sin(pitch)
+            new_node.x += effective_step * math.cos(yaw) * math.cos(pitch)
+            new_node.y += effective_step * math.sin(yaw) * math.cos(pitch)
+            new_node.z += effective_step * math.sin(pitch)
             new_node.path_x.append(new_node.x)
             new_node.path_y.append(new_node.y)
             new_node.path_z.append(new_node.z)
 
-        # ✅ Snap to goal if within one resolution
         if d - extend_length <= self.path_resolution:
-            new_node.x = to_node.x
-            new_node.y = to_node.y
-            new_node.z = to_node.z
+            new_node.x, new_node.y, new_node.z = to_node.x, to_node.y, to_node.z
             new_node.path_x.append(to_node.x)
             new_node.path_y.append(to_node.y)
             new_node.path_z.append(to_node.z)
@@ -100,14 +107,21 @@ class RRTStar3D:
         new_node.parent = from_node
         return new_node
 
+
     def get_random_node(self):
         if random.randint(0, 100) > self.goal_sample_rate:
+            z_sigma = 0.25  # controls how tightly we bias around preferred Z
+            biased_z = np.clip(
+                random.gauss(self.z_preferred, z_sigma),
+                0, 2
+            )
             return Node(
                 random.uniform(self.min_rand, self.max_rand),
                 random.uniform(self.min_rand, self.max_rand),
-                random.uniform(0, 2)
+                biased_z
             )
         return Node(self.end.x, self.end.y, self.end.z)
+
 
     def get_nearest_node_index(self, rnd):
         dlist = [

@@ -64,5 +64,20 @@
       <joint name="target3_joint" type="free" damping="0.0005"/>
     </body> 
 
+    <!-- Forbidden region sphere (visual-only, no physics) -->
+    <body name="forbidden_zone" pos="0 0 1.4">
+      <!-- no inertial → this body has no mass -->
+      <geom 
+          name="forbidden_geom"
+          type="sphere"
+          size="0.4"
+          rgba="1 0 0 0.3"
+          contype="0"
+          conaffinity="0"
+          mass="0"
+      />
+    </body>
+
   </worldbody>
+
 </mujocoinclude>

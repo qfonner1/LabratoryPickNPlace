@@ -45,7 +45,7 @@ class RobotEnv:
         qpos = self.data.qpos.copy()
 
         # Example Panda "home" configuration (7 DOF)
-        qpos[:7] = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        qpos[:7] = np.array([-0.25, -1.75, -1.0, -2.4, 2.4, 0.8, 1.4])
 
         # Assign it back (this preserves object states)
         self.data.qpos[:] = qpos

@@ -83,14 +83,14 @@ class TaskSequence:
                 {"target_id": box_key, "offset": np.array([0,0,0]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 0.5},
                 {"target_id": box_key, "offset": np.array([0,0,0.15]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 0.5},
                 # --- Midpoint step (fixed) ---
-                {"target_id": None, "pos": np.array([0, -0.9, 1.25]), "rot": F.RotX(np.pi/2), "gripper": 0.0, "wait": 0.0, "pos_tol": "loose"}
+                #{"target_id": None, "pos": np.array([0, -0.9, 1.25]), "rot": F.RotX(np.pi/2), "gripper": 0.0, "wait": 0.0, "pos_tol": "loose"}
             ]
 
             # --- Place box on corresponding target (dynamic live reference) ---
             steps += [
                 {"target_id": target_key, "offset": np.array([0,0,0.15]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 0.5},
-                {"target_id": target_key, "offset": np.array([0,0,0]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 0.5, "pos_tol": "tight"},
-                {"target_id": target_key, "offset": np.array([0,0,0]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 0.5},
+                {"target_id": target_key, "offset": np.array([0,0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 0.5, "pos_tol": "tight"},
+                {"target_id": target_key, "offset": np.array([0,0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 0.5},
                 {"target_id": target_key, "offset": np.array([0,0,0.15]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 0.5}
             ]
 
