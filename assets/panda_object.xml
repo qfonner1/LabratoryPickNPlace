@@ -19,7 +19,7 @@
             contype="1" conaffinity="1"
             solimp="0.9 0.95 0.001" solref="0.001 1"
             friction="1 0.005 0.0001"
-            rgba="0 0 1 1"/>
+            rgba="1 1 0 1"/>
       <joint name="box_joint2" type="free" damping="0.0005"/>
     </body>
 
@@ -40,7 +40,7 @@
             contype="1" conaffinity="1"
             solimp="0.9 0.95 0.001" solref="0.001 1"
             friction="1 0.005 0.0001"
-            rgba="1 0 0 1"/>
+            rgba="1 0 1 1"/>
       <joint name="target1_joint" type="free" damping="0.0005"/>
     </body>
 
@@ -54,7 +54,7 @@
       <joint name="target2_joint" type="free" damping="0.0005"/>
     </body>
 
-    <body name="target3" pos="1.0521 -0.2 1.181">
+    <body name="target3" pos="0.75 -0.2 1.181">
       <inertial pos="0.0 0.0 0.0" mass="0.01" diaginertia="0.001 0.001 0.001"/>
       <geom name="target3_geom" type="box" size="0.015 0.015 0.0005" 
             contype="1" conaffinity="1"

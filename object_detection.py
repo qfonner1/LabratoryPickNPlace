@@ -4,9 +4,15 @@ from mujoco.glfw import glfw
 import OpenGL.GL as gl
 from PIL import Image, ImageDraw
 import cv2
+import time, os
 
 
 def object_detection(xml_path, cam_name):
+    # Unique run ID to avoid overwriting files
+    run_id = time.strftime("%Y%m%d_%H%M%S")
+    output_dir = f"outputs/run_{run_id}_{cam_name}"
+    os.makedirs(output_dir, exist_ok=True)
+
     # --------- User config ---------
     XML_PATH = xml_path
     CAM_NAME = cam_name
@@ -18,10 +24,13 @@ def object_detection(xml_path, cam_name):
     USE_HOMOGRAPHY_CALIBRATION = True   # <-- enable table-based mapping
 
     COLOR_CLASSES = {
-        "red_box":   {"ref_rgb": (255, 0, 0),   "tol": 0},
-        "green_box": {"ref_rgb": (0, 255, 0),   "tol": 0},
-        "blue_box":  {"ref_rgb": (0, 0, 255),   "tol": 0},
-    }
+    "red_box":    {"ref_rgb": (255, 0, 0),     "tol": 0},
+    "green_box":  {"ref_rgb": (0, 255, 0),     "tol": 0},
+    "blue_box":   {"ref_rgb": (0, 0, 255),     "tol": 0},
+    "orange_box": {"ref_rgb": (255, 165, 0),   "tol": 0},  # Approximate RGB for Orange
+    "yellow_box": {"ref_rgb": (255, 255, 0),   "tol": 0},  # Approximate RGB for Yellow
+    "purple_box": {"ref_rgb": (128, 0, 128),   "tol": 0},  # Approximate RGB for Purple
+}
 
     GRID = 48
     MIN_PIXELS = 80
@@ -262,7 +271,7 @@ def object_detection(xml_path, cam_name):
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-        cv2.imwrite("table_mask.png", mask)  # save to check visually
+        cv2.imwrite(os.path.join(output_dir, "table_mask.png"), mask)  # save to check visually
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not contours:
@@ -340,7 +349,7 @@ def object_detection(xml_path, cam_name):
 
     print("Rendering overhead image and depth map...")
     rgb, depth_map, fovy_deg, cam_pos, cam_xmat = render_and_capture(model, data, CAM_NAME, WINDOW_SIZE)
-    Image.fromarray(rgb).save("overhead_rgb.png")
+    Image.fromarray(rgb).save(os.path.join(output_dir, "overhead_rgb.png"))
 
     H_homography = calibrate_homography_from_table(rgb, model, data) if USE_HOMOGRAPHY_CALIBRATION else None
 
@@ -372,13 +381,22 @@ def object_detection(xml_path, cam_name):
                         continue  # skip invalid depth point
                 else:
                     continue  # skip out-of-bounds
-            if CAM_NAME=="overhead_cam":
-                table_center= np.array([-0.9, 0.0])
-            elif CAM_NAME=="overhead_cam2":
-                table_center= np.array([0.9, 0.0])
+            if CAM_NAME == "overhead_cam":
+                table_center = np.array([-0.9, 0.0])
+                table_size = np.array([0.2, 0.4])
+            elif CAM_NAME == "overhead_cam2":
+                table_center = np.array([0.9, 0.0])
+                table_size = np.array([0.2, 0.4])
             else:
                 table_center = np.array([-0.9, 0.0])
-            
+                table_size = np.array([0.2, 0.4])
+
+            # --- NEW: Filter points outside table ---
+            x_min, x_max = table_center[0] - table_size[0], table_center[0] + table_size[0]
+            y_min, y_max = table_center[1] - table_size[1], table_center[1] + table_size[1]
+            if not (x_min <= P[0] <= x_max and y_min <= P[1] <= y_max):
+                print(f"⚠️  Skipping {cname} point outside table: X={P[0]:.3f}, Y={P[1]:.3f}")
+                continue  # discard out-of-bounds points
             
             weight = 0.1  # tune this between 0 and 1 as you like
 
@@ -396,7 +414,7 @@ def object_detection(xml_path, cam_name):
             print(f"  {cname}[{i}]  X={P[0]:.4f}, Y={P[1]:.4f}, Z={P[2]:.4f}")
 
     annotated = draw_annotations(rgb, results_by_color_original, results_by_color_shifted, COLOR_CLASSES)
-    Image.fromarray(annotated).save("overhead_rgb_annotated.png")
+    Image.fromarray(annotated).save(os.path.join(output_dir, "overhead_rgb_annotated.png"))
     print("Saved: overhead_rgb_annotated.png\nDone.")
 
     return results_by_color_shifted

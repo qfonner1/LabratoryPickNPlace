@@ -4,6 +4,7 @@ import os
 from robot_controller import RobotController
 from task_sequence import TaskSequence
 import numpy as np
+
 class RobotEnv:
     def __init__(self, xml_path, render_mode="human"):
         self.xml_path = os.path.abspath(xml_path)
@@ -38,7 +39,7 @@ class RobotEnv:
         self.controller.object_grasped_flag = False
 
         # ----------------------------------------------------
-        # ✅ Only change the robot joints — leave object poses alone
+        # Only change the robot joints — leave object poses alone
         # ----------------------------------------------------
         # Copy current qpos so we only modify part of it
         qpos = self.data.qpos.copy()

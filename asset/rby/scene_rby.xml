@@ -1,7 +1,0 @@
-<mujoco model="RBY">
-    
-    <include file="./floor2.xml" />
-
-    <include file="./model.xml" />
-
-</mujoco>
