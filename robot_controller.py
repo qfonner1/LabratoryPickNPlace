@@ -46,23 +46,23 @@ class RobotController:
             dq = J_full.T @ np.linalg.pinv(A) @ error
 
         # --- Controller Barrier Function (CBF) ---
-        forbidden_center = np.array([0.0, 0.0, 1.4])
-        forbidden_radius = 0.4
-        alpha_cbf = 100.0
+        # forbidden_center = np.array([0.0, 0.0, 1.4])
+        # forbidden_radius = 0.4
+        # alpha_cbf = 100.0
 
-        diff = ee_pos - forbidden_center
-        h_val = np.dot(diff, diff) - forbidden_radius**2
-        a = 2 * (Jp.T @ diff)  # Corrected gradient
+        # diff = ee_pos - forbidden_center
+        # h_val = np.dot(diff, diff) - forbidden_radius**2
+        # a = 2 * (Jp.T @ diff)  # Corrected gradient
 
-        distance = np.linalg.norm(diff)
-        margin = 0.05
-        activation = np.clip((forbidden_radius + margin - distance) / margin, 0, 1)
+        # distance = np.linalg.norm(diff)
+        # margin = 0.05
+        # activation = np.clip((forbidden_radius + margin - distance) / margin, 0, 1)
 
-        if activation > 0:
-            b = alpha_cbf * activation * h_val
-            violation = a @ dq + b
-            if violation < 0:
-                dq = dq - (violation / np.dot(a, a)) * a
+        # if activation > 0:
+        #     b = alpha_cbf * activation * h_val
+        #     violation = a @ dq + b
+        #     if violation < 0:
+        #         dq = dq - (violation / np.dot(a, a)) * a
 
 
         # Clip joint velocity
