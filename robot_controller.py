@@ -27,7 +27,8 @@ class RobotController:
             R_err_mat[0, 2] - R_err_mat[2, 0],
             R_err_mat[1, 0] - R_err_mat[0, 1]
         ])
-        error = np.hstack((pos_err, R_err))
+        orientation_gain = 3.0 
+        error = np.hstack((pos_err, orientation_gain * R_err))
 
         # --- Jacobian ---
         Jp = np.zeros((3, nv))

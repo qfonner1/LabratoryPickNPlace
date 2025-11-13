@@ -1,7 +1,7 @@
 import mujoco as mj
 import mujoco.viewer
 import os
-from robot_controller import RobotController
+from robot_controller_OSC import RobotController
 from task_sequence import TaskSequence
 import numpy as np
 

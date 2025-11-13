@@ -6,7 +6,9 @@
                 quat="0.653 0.271 0.271 0.653" />
             <inertial diaginertia="0 0 0" mass="0" pos="0 0 0" />
             <body name="panda_pedestal" pos="0 0 0.5">
-                <geom name="panda_pedestal" size=".2 .38 .5" pos="0 0 0" type="box"
+                <!--geom name="panda_pedestal" size=".2 .38 .5" pos="0 0 0" type="box"
+                    rgba="0.95 0.96 0.93 1" / -->
+                <geom name="panda_pedestal" size=".2 .15 .5" pos="0 0 0" type="box"
                     rgba="0.95 0.96 0.93 1" />
                 <inertial pos="0 0 0" mass="100" diaginertia="0 0 0" />
 
@@ -111,7 +113,7 @@
             <inertial pos="0 0 0" mass="1" diaginertia="0 0 0" />
         </body> -->
 
-        <body name="object table R" pos="0.9 0.0 0.0">
+        <body name="object table R" pos="0.8 0.0 0.0">
             <geom name="object_table_R" size="0.2 0.4 0.04" pos="0.0 0.0 1.04" contype="1" conaffinity="1" type="box" rgba="0.95 0.96 0.93 1.0" />
         </body>
 
@@ -120,7 +122,7 @@
             <inertial pos="0 0 0" mass="1" diaginertia="0 0 0" />
         </body> -->
 
-        <body name="object table L" pos="-0.9 0.0 0.0">
+        <body name="object table L" pos="-0.8 0.0 0.0">
             <geom name="object_table_L" size="0.2 0.4 0.04" pos="0.0 0.0 1.04" contype="1" conaffinity="1" type="box" rgba="0.95 0.96 0.93 1.0" />
         </body>
 

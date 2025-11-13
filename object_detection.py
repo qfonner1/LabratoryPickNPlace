@@ -248,13 +248,13 @@ def object_detection(xml_path, cam_name):
 
     def calibrate_homography_from_table(rgb, model, data):
         if cam_name=="overhead_cam":
-            pos = np.array([-0.9, 0.0])
+            pos = np.array([-0.8, 0.0])
             size = np.array([0.2, 0.4])
         elif cam_name=="overhead_cam2":
-            pos = np.array([0.9, 0.0])
+            pos = np.array([0.8, 0.0])
             size = np.array([0.2, 0.4])
         else:
-            pos=np.array([-0.9, 0.0])
+            pos=np.array([-0.8, 0.0])
             size = np.array([0.2, 0.4])
         
         corners_world = np.array([
@@ -382,13 +382,13 @@ def object_detection(xml_path, cam_name):
                 else:
                     continue  # skip out-of-bounds
             if CAM_NAME == "overhead_cam":
-                table_center = np.array([-0.9, 0.0])
+                table_center = np.array([-0.8, 0.0])
                 table_size = np.array([0.2, 0.4])
             elif CAM_NAME == "overhead_cam2":
-                table_center = np.array([0.9, 0.0])
+                table_center = np.array([0.8, 0.0])
                 table_size = np.array([0.2, 0.4])
             else:
-                table_center = np.array([-0.9, 0.0])
+                table_center = np.array([-0.8, 0.0])
                 table_size = np.array([0.2, 0.4])
 
             # --- NEW: Filter points outside table ---
