@@ -3,6 +3,11 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import interpolate
+import os
+from saving_config import BASE_OUTPUT_DIR
+import saving_config
+import plotly.graph_objects as go
+
 
 # ---------------- PARAMETERS ----------------
 padding = 0.075
@@ -11,7 +16,8 @@ obstacles = [
     (0.8, 0.0, 0.52, 0.2+padding, 0.4+padding, 0.52),
     (0.0, 0.0, 0.5, 0.2+padding, 0.15+padding, 0.5),
     (0.0, 0.0, 1.5, 0.2+padding, 0.4+padding, 0.5),
-    (0,0.5,1,0.2,0.5,1)
+    (0,0.5,1,0.2,0.5,1),
+    #(0,-0.5,1,0.2,0.5,1),
 ]
 
 rand_area = [-1, 1]
@@ -193,43 +199,159 @@ def path_planner(start, goal, max_retries, show_animation):
     for attempt in range(max_retries):
         print(f"[PathPlanner] Attempt {attempt+1}/{max_retries} ...")
         rrt = RRTStar3D(start, goal)
-        path = rrt.plan()
+        rrt_path = rrt.plan()
 
-        if path and len(path) > 1:
-            # Smoothing and densification
-            path = shortcut_smooth(path, iterations=200)
-            path = rounded_smooth(path, radius=2, steps=5)
-            path = densify_path(path, n_points=200)
-            # Optional B-spline smoothing
-            path = bspline_smooth(path, smooth_factor=0.05, num_points=300)
+        if rrt_path and len(rrt_path) > 1:
+            shortcut_path = shortcut_smooth(rrt_path, iterations=200)
+            rounded_path = rounded_smooth(shortcut_path, radius=2, steps=5)
+            densified_path = densify_path(rounded_path, n_points=200)
+            final_path = bspline_smooth(densified_path, smooth_factor=0.05, num_points=300)
 
-            if show_animation:
-                path_plot(path, start, goal)
-            return path
 
-    # If no valid path found, return a simple straight-line fallback
+            path_plot(rrt_path, shortcut_path, final_path, start, goal, show_animation)
+
+            return final_path
+
     print("⚠️ No valid path found, returning straight line fallback")
     fallback = np.linspace(start, goal, num=20).tolist()
-    return fallback
+    return fallback, fallback, fallback
 
 
 # ---------------- PLOTTING ----------------
-def path_plot(path, start, goal):
-    path = np.array(path)
+def path_plot(rrt_path, shortcut_path, final_path, start, goal, show_animation=False, save_html=True):
+    # --- Matplotlib plot (unchanged) ---
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
+
+    # Plot obstacles
     for cx, cy, cz, sx, sy, sz in obstacles:
-        ax.bar3d(cx-sx, cy-sy, cz-sz, sx*2, sy*2, sz*2, alpha=0.3, color='b')
-    ax.plot(path[:,0], path[:,1], path[:,2], '-r', linewidth=2)
-    ax.scatter(start[0], start[1], start[2], c='g', s=80)
-    ax.scatter(goal[0], goal[1], goal[2], c='m', s=80)
+        ax.bar3d(cx-sx, cy-sy, cz-sz, sx*2, sy*2, sz*2, alpha=0.3, color='w')
+
+    # Plot paths
+    rrt_path = np.array(rrt_path)
+    shortcut_path = np.array(shortcut_path)
+    final_path = np.array(final_path)
+
+    ax.plot(rrt_path[:,0], rrt_path[:,1], rrt_path[:,2], '-k', linewidth=1, label="RRT* path")
+    ax.plot(shortcut_path[:,0], shortcut_path[:,1], shortcut_path[:,2], '-b', linewidth=2, label="Shortcut path")
+    ax.plot(final_path[:,0], final_path[:,1], final_path[:,2], '-r', linewidth=3, label="Final smoothed path")
+
+    # Start and goal
+    ax.scatter(start[0], start[1], start[2], c='g', s=80, label="Start")
+    ax.scatter(goal[0], goal[1], goal[2], c='r', s=80, label="Goal")
+
+    # Waypoints at 1/3 and 2/3 along the final path
+    dist_start_goal = math.dist(start, goal)
+    if dist_start_goal > 0.1:
+        n = len(final_path)
+        idx1, idx2 = n//3, 2*n//3
+        ax.scatter(final_path[idx1,0], final_path[idx1,1], final_path[idx1,2], c='c', s=60, label='_nolegend_')
+        ax.scatter(final_path[idx2,0], final_path[idx2,1], final_path[idx2,2], c='c', s=60, label='_nolegend_')
+
+    # title, labels, limits, legend
+    ax.set_title("End Effector Path")
+    ax.set_xlabel("X"); ax.set_ylabel("Y"); ax.set_zlabel("Z")
     ax.set_xlim(rand_area); ax.set_ylim(rand_area); ax.set_zlim(z_limits)
-    plt.show()
+    ax.legend()
+    if show_animation is True:
+        plt.show()
+
+    # Save PNG
+    saving_config.PLOT_COUNTER += 1
+    plot_filename = os.path.join(BASE_OUTPUT_DIR, f"path_{saving_config.PLOT_COUNTER}.png")
+    fig.savefig(plot_filename)
+    print(f"Plot saved to: {plot_filename}")
+    plt.close(fig)
+
+    # Save interactive HTML with Plotly ---
+    if save_html:
+        fig_html = go.Figure()
+
+        # Obstacles as semi-transparent cubes
+        for cx, cy, cz, sx, sy, sz in obstacles:
+            # Six faces of the cube
+
+            # XY planes (top and bottom)
+            for z0 in [cz - sz, cz + sz]:
+                fig_html.add_trace(go.Surface(
+                    x=[[cx-sx, cx+sx], [cx-sx, cx+sx]],
+                    y=[[cy-sy, cy-sy], [cy+sy, cy+sy]],
+                    z=[[z0, z0], [z0, z0]],
+                    colorscale=[[0, 'white'], [1, 'white']],
+                    opacity=1.0,
+                    showscale=False,
+                    name='Obstacle',
+                ))
+
+            # XZ planes (front and back)
+            for y0 in [cy - sy, cy + sy]:
+                fig_html.add_trace(go.Surface(
+                    x=[[cx-sx, cx+sx], [cx-sx, cx+sx]],
+                    y=[[y0, y0], [y0, y0]],
+                    z=[[cz-sz, cz-sz], [cz+sz, cz+sz]],
+                    colorscale=[[0, 'white'], [1, 'white']],
+                    opacity=1.0,
+                    showscale=False,
+                    name='Obstacle',
+                ))
+
+            # YZ planes (left and right)
+            for x0 in [cx - sx, cx + sx]:
+                fig_html.add_trace(go.Surface(
+                    x=[[x0, x0], [x0, x0]],
+                    y=[[cy-sy, cy-sy], [cy+sy, cy+sy]],
+                    z=[[cz-sz, cz+sz], [cz-sz, cz+sz]],
+                    colorscale=[[0, 'white'], [1, 'white']],
+                    opacity=1.0,
+                    showscale=False,
+                    name='Obstacle',
+                ))
+
+
+
+
+        # Paths
+        fig_html.add_trace(go.Scatter3d(x=rrt_path[:,0], y=rrt_path[:,1], z=rrt_path[:,2],
+                                        mode='lines', line=dict(color='black', width=4), name='RRT* path'))
+        fig_html.add_trace(go.Scatter3d(x=shortcut_path[:,0], y=shortcut_path[:,1], z=shortcut_path[:,2],
+                                        mode='lines', line=dict(color='blue', width=6), name='Shortcut path'))
+        fig_html.add_trace(go.Scatter3d(x=final_path[:,0], y=final_path[:,1], z=final_path[:,2],
+                                        mode='lines', line=dict(color='red', width=8), name='Final path'))
+
+        # Start and goal
+        fig_html.add_trace(go.Scatter3d(x=[start[0]], y=[start[1]], z=[start[2]],
+                                        mode='markers', marker=dict(size=6, color='green'), name='Start'))
+        fig_html.add_trace(go.Scatter3d(x=[goal[0]], y=[goal[1]], z=[goal[2]],
+                                        mode='markers', marker=dict(size=6, color='red'), name='Goal'))
+
+        # Waypoints
+        if dist_start_goal > 0.1:
+            fig_html.add_trace(go.Scatter3d(x=[final_path[idx1,0], final_path[idx2,0]],
+                                            y=[final_path[idx1,1], final_path[idx2,1]],
+                                            z=[final_path[idx1,2], final_path[idx2,2]],
+                                            mode='markers', marker=dict(size=6, color='cyan'),
+                                            name='Waypoints'))
+
+
+        # Layout
+        fig_html.update_layout(scene=dict(
+            xaxis_title='X', yaxis_title='Y', zaxis_title='Z',
+            xaxis=dict(range=rand_area),
+            yaxis=dict(range=rand_area),
+            zaxis=dict(range=z_limits),
+            aspectmode='cube'  # ensures equal scaling
+        ))
+        html_filename = os.path.join(BASE_OUTPUT_DIR, f"path_{saving_config.PLOT_COUNTER}.html")
+        fig_html.write_html(html_filename)
+        print(f"Interactive HTML plot saved to: {html_filename}")
+
+
+
 
 # ---------------- MAIN ----------------
-if __name__ == "__main__":
-    start_list = [-0.9, 0, 1.33]
-    end_list   = [0.9, 0, 1.33]
+# if __name__ == "__main__":
+#     start_list = [-0.9, 0, 1.33]
+#     end_list   = [0.9, 0, 1.33]
 
-    positions = path_planner(start=start_list, goal=end_list, max_retries=20, show_animation=True)
-    print(f"✅ Generated {len(positions)} waypoints.")
+#     final_path = path_planner(start=start_list, goal=end_list, max_retries=20, show_animation=True)
+#     print(f"✅ Generated {len(final_path)} waypoints in final path.")

@@ -1,6 +1,13 @@
 import time
 from robot_env import RobotEnv
 import object_detection as OD
+import time
+from saving_config import BASE_OUTPUT_DIR
+
+# ------------------------------
+# Output Saving
+# ------------------------------
+print(f"All outputs will be saved to: {BASE_OUTPUT_DIR}")
 
 # ------------------------------
 # Object Detection

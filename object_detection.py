@@ -4,16 +4,12 @@ from mujoco.glfw import glfw
 import OpenGL.GL as gl
 from PIL import Image, ImageDraw
 import cv2
-import time, os
+import os
+from saving_config import BASE_OUTPUT_DIR
 
 
 def object_detection(xml_path, cam_name):
-    # Unique run ID to avoid overwriting files
-    run_id = time.strftime("%Y%m%d_%H%M%S")
-    output_dir = f"outputs/run_{run_id}_{cam_name}"
-    os.makedirs(output_dir, exist_ok=True)
-
-    # --------- User config ---------
+ # --------- User config ---------
     XML_PATH = xml_path
     CAM_NAME = cam_name
     WINDOW_SIZE = (1200, 900)
@@ -271,7 +267,7 @@ def object_detection(xml_path, cam_name):
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-        cv2.imwrite(os.path.join(output_dir, "table_mask.png"), mask)  # save to check visually
+        cv2.imwrite(os.path.join(BASE_OUTPUT_DIR, "table_mask.png"), mask)  # save to check visually
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not contours:
@@ -349,7 +345,7 @@ def object_detection(xml_path, cam_name):
 
     print("Rendering overhead image and depth map...")
     rgb, depth_map, fovy_deg, cam_pos, cam_xmat = render_and_capture(model, data, CAM_NAME, WINDOW_SIZE)
-    Image.fromarray(rgb).save(os.path.join(output_dir, "overhead_rgb.png"))
+    Image.fromarray(rgb).save(os.path.join(BASE_OUTPUT_DIR, "overhead_rgb.png"))
 
     H_homography = calibrate_homography_from_table(rgb, model, data) if USE_HOMOGRAPHY_CALIBRATION else None
 
@@ -414,7 +410,7 @@ def object_detection(xml_path, cam_name):
             print(f"  {cname}[{i}]  X={P[0]:.4f}, Y={P[1]:.4f}, Z={P[2]:.4f}")
 
     annotated = draw_annotations(rgb, results_by_color_original, results_by_color_shifted, COLOR_CLASSES)
-    Image.fromarray(annotated).save(os.path.join(output_dir, "overhead_rgb_annotated.png"))
+    Image.fromarray(annotated).save(os.path.join(BASE_OUTPUT_DIR, "overhead_rgb_annotated.png"))
     print("Saved: overhead_rgb_annotated.png\nDone.")
 
     return results_by_color_shifted

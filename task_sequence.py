@@ -11,14 +11,15 @@ class TaskSequence:
         self.current_step = 0
         self.waiting = False
         self.wait_timer = 0.0
-        self.active = True  # Only process steps when active
+        self.active = True  
         self.completed = False
         self.steps = []
         self.reset()
-
-        # --- new: substeps created from planner for smooth transitions
-        self.substeps = []      # list of dict steps (same format as self.steps entries)
+        self.substeps = []   
         self.substep_idx = 0
+        self.last_target_pos = None
+        self.last_target_rot = None
+        self.last_gripper_open = 0.0
 
     # --------------------------
     # Vision updates
@@ -197,8 +198,11 @@ class TaskSequence:
 
         # Early return if inactive or completed
         if not self.active:
-            gripper_targets = {"left": 0.0, "right": 0.0}
-            return ee_pos, np.eye(3), gripper_targets, None
+            gripper_targets = {"left": 0.04*self.last_gripper_open, "right": -0.04*self.last_gripper_open}
+            if self.last_target_pos is not None and self.last_target_rot is not None:
+                return self.last_target_pos, self.last_target_rot, gripper_targets, self.last_gripper_open
+            else:
+                return ee_pos, ee_rot, gripper_targets, None
 
         # Determine current step (substep or main)
         if self.substeps and self.substep_idx < len(self.substeps):
@@ -264,15 +268,25 @@ class TaskSequence:
                     else:
                         self.advance_step()
             else:
-                if step.get("wait",0.0) > 0:
+                if step.get("wait", 0.0) > 0:
                     self.waiting = True
                     self.wait_timer = 0.0
+                    # ✅ If this is the last step, complete after waiting
+                    if self.current_step == len(self.steps) - 1:
+                        print("\n[TaskSequence] Tasks complete! 🎉\n")
+                        self.completed = True
+                        self.active = False
                 else:
                     self.advance_step()
 
         # Gripper
         gripper_open = step.get("gripper", 0.0)
         gripper_targets = {"left": 0.04*gripper_open, "right": -0.04*gripper_open}
+
+        # Store last pose so robot can hold it later
+        self.last_target_pos = target_pos.copy()
+        self.last_target_rot = target_rot.copy()
+        self.last_gripper_open = gripper_open
 
         # Debug
         if not self.completed:
@@ -289,12 +303,6 @@ class TaskSequence:
     def advance_step(self):
         if self.current_step < len(self.steps) - 1:
             self.current_step += 1
-        else:
-            if not self.completed:
-                print("\n✅ [TaskSequence] All steps completed successfully! 🎉\n")
-                self.completed = True
-            self.active = False
-
 
     def reset(self):
         self.current_step = 0
@@ -306,3 +314,6 @@ class TaskSequence:
         self.substep_idx = 0
         self.completed = False
         self.active = True
+        self.last_target_pos = None
+        self.last_target_rot = None
+        self.last_gripper_open = 0.0
