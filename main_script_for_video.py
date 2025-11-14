@@ -18,6 +18,13 @@ xml_path = os.path.join(dirname, xml_path)
 model = mj.MjModel.from_xml_path(xml_path)
 data = mj.MjData(model)
 
+# --- Set initial joint positions ---
+initial_qpos = np.array([-0.25, -1.75, -1.0, -2.4, 2.4, 0.8, 1.4])
+qpos = data.qpos.copy()
+qpos[:7] = initial_qpos
+data.qpos[:] = qpos
+mj.mj_forward(model, data)
+
 # --- Gripper setup ---
 act1 = model.actuator("panda_gripper_finger_joint1").id
 act2 = model.actuator("panda_gripper_finger_joint2").id
@@ -31,7 +38,12 @@ controller_obj = RobotController(ee_site_id, model)
 task_seq = TaskSequence(model)
 
 detected_objects = OD.object_detection("franka_panda_w_objs.xml", "overhead_cam")
-task_seq.set_targets_from_vision(detected_objects)
+detected_targets=OD.object_detection("franka_panda_w_objs.xml", "overhead_cam2")
+task_seq.set_boxes_from_vision(detected_objects)
+task_seq.set_targets_from_vision(detected_targets)
+
+ee_pos = data.site_xpos[ee_site_id].copy()  
+task_seq.generate_steps(ee_pos)
 
 # --- Initialize GLFW ---
 if not glfw.init():
