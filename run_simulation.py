@@ -7,12 +7,12 @@ from saving_config import BASE_OUTPUT_DIR
 # ------------------------------
 # Output Saving
 # ------------------------------
-print(f"All outputs will be saved to: {BASE_OUTPUT_DIR}")
+print(f"[Run Simulation] All outputs will be saved to: {BASE_OUTPUT_DIR}")
 
 # ------------------------------
 # Object Detection
 # ------------------------------
-print("Running object detection...")
+print("[Run Simulation] Running object detection...")
 detected_objects = OD.object_detection("franka_panda_w_objs.xml", "overhead_cam")
 detected_targets=OD.object_detection("franka_panda_w_objs.xml", "overhead_cam2")
 # ------------------------------
@@ -27,7 +27,7 @@ env.task_seq.set_targets_from_vision(detected_targets)
 # Generate dynamic steps based on current EE position
 ee_pos = env.get_ee_position()  
 env.task_seq.generate_steps(ee_pos)
-print("[TaskSequence] Targets updated from vision!")
+print("[Run Simulation] Targets updated from vision!")
 
 obs = env.reset()
 
@@ -40,15 +40,15 @@ try:
 
         # Stop if sequence is complete
         if done:
-            print("Sequence complete!")
+            print("[Run Simulation] Sequence complete!")
             break
 
         # Small sleep to match simulation timestep
         time.sleep(env.dt)
 
 except KeyboardInterrupt:
-    print("Simulation interrupted by user.")
+    print("[Run Simulation] Simulation interrupted by user.")
 
 finally:
     env.close()
-    print("Environment closed.")
+    print("[Run Simulation] Environment closed.")

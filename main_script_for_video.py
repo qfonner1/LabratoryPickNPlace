@@ -3,7 +3,7 @@ from mujoco.glfw import glfw
 import numpy as np
 import os
 import imageio
-from robot_controller import RobotController
+from robot_controller_OSC import RobotController
 from task_sequence import TaskSequence
 import object_detection as OD
 
@@ -150,4 +150,4 @@ renderer3.close()
 # --- Save recorded video ---
 output_path = os.path.join(dirname, "simulation_standingcams.mp4")
 imageio.mimsave(output_path, frames, fps=60)
-print(f"🎥 Two-view simulation video saved to: {output_path}")
+print(f"🎥 Three-view simulation video saved to: {output_path}")

@@ -33,10 +33,10 @@ class TaskSequence:
                 continue
             self.targets[cname] = [p.tolist() if isinstance(p, np.ndarray) else p for p in points]
 
-        print("[TaskSequence] Updated boxes from vision:")
+        print("[Task Sequence] Updated boxes from vision:")
         for key, pts in self.targets.items():
             for i, p in enumerate(pts):
-                print(f"  {key}[{i}] -> {p}")
+                print(f"[Task Sequence]  {key}[{i}] -> {p}")
 
     def set_targets_from_vision(self, detected_targets):
         """
@@ -50,7 +50,7 @@ class TaskSequence:
             key = f"{color_name}_target"
             self.targets[key] = [p.tolist() if isinstance(p, np.ndarray) else p for p in points]
 
-        print("[TaskSequence] Updated targets from vision:")
+        print("[Task Sequence] Updated targets from vision:")
         for key, pts in self.targets.items():
             for i, p in enumerate(pts):
                 print(f"  {key}[{i}] -> {p}")
@@ -61,7 +61,7 @@ class TaskSequence:
     def generate_steps(self, ee_pos):
         boxes = [(k, np.array(p[0])) for k, p in self.targets.items() if k.endswith("_box")]
         if len(boxes) == 0:
-            print("[TaskSequence] No boxes detected yet.")
+            print("[Task Sequence] No boxes detected yet.")
             return
 
         # Sort boxes by distance to end-effector
@@ -75,7 +75,7 @@ class TaskSequence:
 
             # --- Only proceed if matching target exists ---
             if target_key not in self.targets:
-                print(f"[TaskSequence] ⚠️ No target for {box_key} → skipping.")
+                print(f"[Task Sequence] ⚠️ No target for {box_key} → skipping.")
                 continue
 
             # --- Pick up box ---
@@ -100,7 +100,7 @@ class TaskSequence:
         self.current_step = 0
         self.waiting = False
         self.wait_timer = 0.0
-        print(f"[TaskSequence] Steps regenerated for {len(boxes)} boxes with color matching.")
+        print(f"[Task Sequence] Steps regenerated for {len(boxes)} boxes with color matching.")
 
     # --------------------------
     # New: Plan and insert substeps (waypoints)
@@ -131,11 +131,11 @@ class TaskSequence:
         end_list   = end_pos.tolist()   if isinstance(end_pos, np.ndarray)   else list(end_pos)
 
         # Get path positions from planner
-        positions = path_planner(start=start_list, goal=end_list, max_retries=5, show_animation=True)
+        positions = path_planner(start=start_list, goal=end_list, max_retries=5, show_animation=False)
         positions = np.array(positions)
 
         if len(positions) < 2:
-            print("[Warning] Path has too few points; skipping interpolation.")
+            print("[Task Sequence] Warning! Path has too few points; skipping interpolation.")
             positions = [start_pos, end_pos]
 
 
@@ -167,7 +167,7 @@ class TaskSequence:
         # Determine long_path
         long_path = angle < (np.pi / 2)
 
-        print(f"Initial tangent angle: {np.degrees(angle):.2f} deg, long_path: {long_path}")
+        print(f"[Task Sequence] Initial tangent angle: {np.degrees(angle):.2f} deg, long_path: {long_path}")
 
         # Now use this for all substeps
         substeps = []
@@ -224,7 +224,7 @@ class TaskSequence:
                     self.substeps = []
                     self.substep_idx = 0
 
-            print(f"Substep {self.substep_idx}/{len(self.substeps)} | Dist: {dist:.3f}", flush=True)
+            print(f"[Task Sequence] Substep {self.substep_idx}/{len(self.substeps)} | Dist: {dist:.3f}", flush=True)
             return target_pos, target_rot, gripper_targets, gripper_open
 
         # Main step handling
@@ -273,7 +273,7 @@ class TaskSequence:
                     self.wait_timer = 0.0
                     # ✅ If this is the last step, complete after waiting
                     if self.current_step == len(self.steps) - 1:
-                        print("\n[TaskSequence] Tasks complete! 🎉\n")
+                        print("\n[Task Sequence] Tasks complete! 🎉\n")
                         self.completed = True
                         self.active = False
                 else:
@@ -290,7 +290,7 @@ class TaskSequence:
 
         # Debug
         if not self.completed:
-            print(f"Step {self.current_step} | EE Pos: [{', '.join(f'{x:.3f}' for x in ee_pos)}] "
+            print(f"[Task Sequence] Step {self.current_step} | EE Pos: [{', '.join(f'{x:.3f}' for x in ee_pos)}] "
                 f"| Target Pos: [{', '.join(f'{x:.3f}' for x in target_pos)}] "
                 f"| Dist: {dist:.3f} | Angle Diff: {angle_deg:.2f}°", flush=True)
 

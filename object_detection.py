@@ -6,9 +6,11 @@ from PIL import Image, ImageDraw
 import cv2
 import os
 from saving_config import BASE_OUTPUT_DIR
+import saving_config
 
 
 def object_detection(xml_path, cam_name):
+    saving_config.CAPTURE_COUNTER += 1
  # --------- User config ---------
     XML_PATH = xml_path
     CAM_NAME = cam_name
@@ -60,20 +62,6 @@ def object_detection(xml_path, cam_name):
 
 
     def mask_from_ref_hsv(rgb, ref_rgb, hue_tol=15, sat_min=10, val_min=10):
-        """
-        Create mask by comparing image to a reference RGB color in HSV space,
-        allowing hue tolerance and thresholds on saturation and value for darker pixels.
-
-        Args:
-            rgb: (H, W, 3) uint8 image in RGB.
-            ref_rgb: (3,) reference RGB color tuple (0-255).
-            hue_tol: int tolerance around hue (in degrees, 0-180 in OpenCV).
-            sat_min: int minimum saturation (0-255).
-            val_min: int minimum value/brightness (0-255).
-
-        Returns:
-            mask: (H, W) boolean mask where pixels match color within tolerance.
-        """
         # Convert image to HSV
         hsv_img = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
         
@@ -194,7 +182,7 @@ def object_detection(xml_path, cam_name):
 
         cam_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_CAMERA, cam_name)
         if cam_id < 0:
-            raise ValueError(f"Camera '{cam_name}' not found")
+            raise ValueError(f"[Object Detection] Camera '{cam_name}' not found")
 
         cam.type = mj.mjtCamera.mjCAMERA_FIXED
         cam.fixedcamid = cam_id
@@ -267,26 +255,26 @@ def object_detection(xml_path, cam_name):
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-        cv2.imwrite(os.path.join(BASE_OUTPUT_DIR, "table_mask.png"), mask)  # save to check visually
+        cv2.imwrite(os.path.join(BASE_OUTPUT_DIR, f"table_mask_{saving_config.CAPTURE_COUNTER}.png"), mask)  # save to check visually
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not contours:
-            print("⚠️  Table contour not found — homography disabled.")
+            print("[Object Detection] Table contour not found — homography disabled.")
             return None
 
         largest = max(contours, key=cv2.contourArea)
-        print(f"Largest contour area: {cv2.contourArea(largest)}")
+        print(f"[Object Detection] Largest contour area: {cv2.contourArea(largest)}")
 
         epsilon = 0.05 * cv2.arcLength(largest, True)
         approx = cv2.approxPolyDP(largest, epsilon, True)
 
         if len(approx) != 4:
-            print(f"⚠️  Table contour not quadrilateral (found {len(approx)} corners) — trying minAreaRect fallback.")
+            print(f"[Object Detection] Table contour not quadrilateral (found {len(approx)} corners) — trying minAreaRect fallback.")
             rect = cv2.minAreaRect(largest)
             box = cv2.boxPoints(rect)
             approx = np.int0(box)
             if len(approx) != 4:
-                print("⚠️  Fallback contour also not quadrilateral — homography disabled.")
+                print("[Object Detection] Fallback contour also not quadrilateral — homography disabled.")
                 return None
 
         corners_px = np.array([p[0] if p.shape == (1,2) else p for p in approx], dtype=np.float32)
@@ -299,9 +287,9 @@ def object_detection(xml_path, cam_name):
             uv1 = np.array([pt[0], pt[1], 1.0])
             XY1 = H @ uv1
             XY1 /= XY1[2]
-            print(f"Image corner {i}: pixel {pt} → world {XY1[:2]}")
+            print(f"[Object Detection] Image corner {i}: pixel {pt} → world {XY1[:2]}")
 
-        print("Homography calibration successful.")
+        print("[Object Detection] Homography calibration successful.")
         return H
 
 
@@ -329,27 +317,27 @@ def object_detection(xml_path, cam_name):
         return np.array(img)
 
 
-    print("Loading model...")
+    print("[Object Detection] Loading model...")
     model = mj.MjModel.from_xml_path(XML_PATH)
     data = mj.MjData(model)
 
     z_table = estimate_table_z_from_known_geom(model, data)
     if z_table is None:
         z_table = Z_TABLE_FALLBACK
-        print(f"Table Height Estimation Failed!")
+        print(f"[Object Detection] Table Height Estimation Failed!")
     else:
-        print(f"Estimated table height z={z_table:.3f} m")
+        print(f"[Object Detection] Estimated table height z={z_table:.3f} m")
 
     z_target = z_table + Z_ABOVE_TABLE
-    print(f"Using centroid Z = {z_target:.3f} m")
+    print(f"[Object Detection] Using centroid Z = {z_target:.3f} m")
 
-    print("Rendering overhead image and depth map...")
+    print("[Object Detection] Rendering overhead image and depth map...")
     rgb, depth_map, fovy_deg, cam_pos, cam_xmat = render_and_capture(model, data, CAM_NAME, WINDOW_SIZE)
-    Image.fromarray(rgb).save(os.path.join(BASE_OUTPUT_DIR, "overhead_rgb.png"))
+    Image.fromarray(rgb).save(os.path.join(BASE_OUTPUT_DIR, f"overhead_rgb_{saving_config.CAPTURE_COUNTER}.png"))
 
     H_homography = calibrate_homography_from_table(rgb, model, data) if USE_HOMOGRAPHY_CALIBRATION else None
 
-    print("Detecting colors...")
+    print("[Object Detection] Detecting colors...")
     detections = detect_colors_centroids(rgb, COLOR_CLASSES, grid=GRID, min_pixels=MIN_PIXELS)
     results_by_color_shifted = {}
     results_by_color_original = detections
@@ -391,7 +379,7 @@ def object_detection(xml_path, cam_name):
             x_min, x_max = table_center[0] - table_size[0], table_center[0] + table_size[0]
             y_min, y_max = table_center[1] - table_size[1], table_center[1] + table_size[1]
             if not (x_min <= P[0] <= x_max and y_min <= P[1] <= y_max):
-                print(f"⚠️  Skipping {cname} point outside table: X={P[0]:.3f}, Y={P[1]:.3f}")
+                print(f"[Object Detection] Skipping {cname} point outside table: X={P[0]:.3f}, Y={P[1]:.3f}")
                 continue  # discard out-of-bounds points
             
             weight = 0.1  # tune this between 0 and 1 as you like
@@ -405,13 +393,13 @@ def object_detection(xml_path, cam_name):
         results_by_color_shifted[cname] = pts_world_shifted
 
     for cname, pts in results_by_color_shifted.items():
-        print(f"\n{cname}: found {len(pts)} object(s)")
+        print(f"[Object Detection] {cname}: found {len(pts)} object(s)")
         for i, P in enumerate(pts):
-            print(f"  {cname}[{i}]  X={P[0]:.4f}, Y={P[1]:.4f}, Z={P[2]:.4f}")
+            print(f"[Object Detection] {cname}[{i}]  X={P[0]:.4f}, Y={P[1]:.4f}, Z={P[2]:.4f}")
 
     annotated = draw_annotations(rgb, results_by_color_original, results_by_color_shifted, COLOR_CLASSES)
-    Image.fromarray(annotated).save(os.path.join(BASE_OUTPUT_DIR, "overhead_rgb_annotated.png"))
-    print("Saved: overhead_rgb_annotated.png\nDone.")
+    Image.fromarray(annotated).save(os.path.join(BASE_OUTPUT_DIR, f"overhead_rgb_annotated_{saving_config.CAPTURE_COUNTER}.png"))
+    print("[Object Detection] Saved: overhead_rgb_annotated.png. Done.")
 
     return results_by_color_shifted
 

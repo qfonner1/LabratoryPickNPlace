@@ -16,7 +16,7 @@ obstacles = [
     (0.8, 0.0, 0.52, 0.2+padding, 0.4+padding, 0.52),
     (0.0, 0.0, 0.5, 0.2+padding, 0.15+padding, 0.5),
     (0.0, 0.0, 1.5, 0.2+padding, 0.4+padding, 0.5),
-    (0,0.5,1,0.2,0.5,1),
+    (0,1.0,1,0.2,0.5,1),
     #(0,-0.5,1,0.2,0.5,1),
 ]
 
@@ -185,7 +185,7 @@ def bspline_smooth(path, smooth_factor=0, num_points=300, degree=3):
     try:
         tck, _ = interpolate.splprep(path.T, u=dist, s=smooth_factor, k=min(degree, len(path)-1))
     except Exception as e:
-        print(f"[B-spline warning] Fallback to linear interpolation ({e})")
+        print(f"[Path Planner] Fallback to linear interpolation ({e})")
         return densify_path(path, n_points=num_points)  # fallback if spline fails
 
     u_fine = np.linspace(0, dist[-1], num_points)
@@ -197,7 +197,7 @@ def bspline_smooth(path, smooth_factor=0, num_points=300, degree=3):
 # ---------------- ROBUST PLANNER ----------------
 def path_planner(start, goal, max_retries, show_animation):
     for attempt in range(max_retries):
-        print(f"[PathPlanner] Attempt {attempt+1}/{max_retries} ...")
+        print(f"[Path Planner] Attempt {attempt+1}/{max_retries} ...")
         rrt = RRTStar3D(start, goal)
         rrt_path = rrt.plan()
 
@@ -208,17 +208,17 @@ def path_planner(start, goal, max_retries, show_animation):
             final_path = bspline_smooth(densified_path, smooth_factor=0.05, num_points=300)
 
 
-            path_plot(rrt_path, shortcut_path, final_path, start, goal, show_animation)
+            path_plot(rrt_path, shortcut_path, rounded_path, final_path, start, goal, show_animation)
 
             return final_path
 
-    print("⚠️ No valid path found, returning straight line fallback")
+    print("[Path Planner] No valid path found, returning straight line fallback")
     fallback = np.linspace(start, goal, num=20).tolist()
     return fallback, fallback, fallback
 
 
 # ---------------- PLOTTING ----------------
-def path_plot(rrt_path, shortcut_path, final_path, start, goal, show_animation=False, save_html=True):
+def path_plot(rrt_path, shortcut_path, rounded_path, final_path, start, goal, show_animation=False, save_html=True):
     # --- Matplotlib plot (unchanged) ---
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
@@ -230,11 +230,13 @@ def path_plot(rrt_path, shortcut_path, final_path, start, goal, show_animation=F
     # Plot paths
     rrt_path = np.array(rrt_path)
     shortcut_path = np.array(shortcut_path)
+    rounded_path = np.array(rounded_path)
     final_path = np.array(final_path)
 
     ax.plot(rrt_path[:,0], rrt_path[:,1], rrt_path[:,2], '-k', linewidth=1, label="RRT* path")
     ax.plot(shortcut_path[:,0], shortcut_path[:,1], shortcut_path[:,2], '-b', linewidth=2, label="Shortcut path")
-    ax.plot(final_path[:,0], final_path[:,1], final_path[:,2], '-r', linewidth=3, label="Final smoothed path")
+    ax.plot(rounded_path[:,0], rounded_path[:,1], rounded_path[:,2], '-y', linewidth=2, label="Rounded path")
+    ax.plot(final_path[:,0], final_path[:,1], final_path[:,2], '-r', linewidth=3, label="Final Smoothed path")
 
     # Start and goal
     ax.scatter(start[0], start[1], start[2], c='g', s=80, label="Start")
@@ -260,7 +262,7 @@ def path_plot(rrt_path, shortcut_path, final_path, start, goal, show_animation=F
     saving_config.PLOT_COUNTER += 1
     plot_filename = os.path.join(BASE_OUTPUT_DIR, f"path_{saving_config.PLOT_COUNTER}.png")
     fig.savefig(plot_filename)
-    print(f"Plot saved to: {plot_filename}")
+    print(f"[Path Planner] Plot saved to: {plot_filename}")
     plt.close(fig)
 
     # Save interactive HTML with Plotly ---
@@ -343,7 +345,7 @@ def path_plot(rrt_path, shortcut_path, final_path, start, goal, show_animation=F
         ))
         html_filename = os.path.join(BASE_OUTPUT_DIR, f"path_{saving_config.PLOT_COUNTER}.html")
         fig_html.write_html(html_filename)
-        print(f"Interactive HTML plot saved to: {html_filename}")
+        print(f"[Path Planner] Interactive HTML plot saved to: {html_filename}")
 
 
 

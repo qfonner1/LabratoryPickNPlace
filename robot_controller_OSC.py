@@ -1,21 +1,6 @@
 import numpy as np
 import mujoco as mj
-
-def quat_multiply(q1, q2):
-    """Hamilton product of two quaternions (w, x, y, z)."""
-    w1, x1, y1, z1 = q1
-    w2, x2, y2, z2 = q2
-    return np.array([
-        w1*w2 - x1*x2 - y1*y2 - z1*z2,
-        w1*x2 + x1*w2 + y1*z2 - z1*y2,
-        w1*y2 - x1*z2 + y1*w2 + z1*x2,
-        w1*z2 + x1*y2 - y1*x2 + z1*w2
-    ])
-
-def quat_conjugate(q):
-    """Quaternion conjugate (inverse for unit quaternions)."""
-    w, x, y, z = q
-    return np.array([w, -x, -y, -z])
+import Functions as F
 
 
 class RobotController:
@@ -50,7 +35,7 @@ class RobotController:
         pos_err = target_pos - ee_pos
 
         # --- Quaternion orientation error ---
-        q_err = quat_multiply(target_quat, quat_conjugate(ee_quat))
+        q_err = F.quat_multiply(target_quat, F.quat_conjugate(ee_quat))
         if q_err[0] < 0:
             q_err *= -1  # ensure shortest rotation
         ori_err = 3.0 * q_err[1:4]

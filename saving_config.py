@@ -7,3 +7,6 @@ os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
 
 # Counter for plot filenames
 PLOT_COUNTER = 0
+
+# Object detection counter
+CAPTURE_COUNTER = 0
