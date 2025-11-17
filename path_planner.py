@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 # ---------------- PARAMETERS ----------------
 padding = 0.075
-wall_padding = 0.02
+wall_padding = 0.05
 obstacles = [
     (-0.8, 0.0, 0.52, 0.2+padding, 0.4+padding, 0.52),
     (0.8, 0.0, 0.52, 0.2+padding, 0.4+padding, 0.52),

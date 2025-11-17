@@ -3,6 +3,7 @@ from robot_env import RobotEnv
 import object_detection as OD
 import time
 from saving_config import BASE_OUTPUT_DIR 
+import numpy as np
 
 # ------------------------------
 # Output Saving
@@ -52,3 +53,24 @@ except KeyboardInterrupt:
 finally:
     env.close()
     print("[Run Simulation] Environment closed.")
+
+
+# ------------------------------
+# Final Stats
+# ------------------------------
+
+# Get body position by name
+def get_body_position(model, data, body_name):
+    body_id = model.body(body_name).id
+    pos = data.xpos[body_id].copy()  # (x, y, z)
+    return pos
+
+object_pos = get_body_position(env.model, env.data, "box1")[:2]
+target_pos = get_body_position(env.model, env.data, "target1")[:2]
+print("Object position:", object_pos)
+print("Target position:", target_pos)
+
+error = np.linalg.norm(object_pos - target_pos)
+print(f"Distance to target: {error:.3f} meters")
+axis_error = object_pos - target_pos
+print("Error by axis:", axis_error)

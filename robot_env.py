@@ -103,7 +103,7 @@ class RobotEnv:
             self.viewer.sync()
 
     def _compute_reward_done(self):
-        done = self.task_seq.current_step >= len(self.task_seq.steps) and not self.task_seq.waiting
+        done = self.task_seq.completed or self.task_seq.current_step >= len(self.task_seq.steps) and not self.task_seq.waiting
         reward = 1.0 if done else 0.0
         return reward, done, {"step_idx": self.task_seq.current_step}
 

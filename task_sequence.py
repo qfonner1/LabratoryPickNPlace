@@ -271,9 +271,9 @@ class TaskSequence:
                 if step.get("wait", 0.0) > 0:
                     self.waiting = True
                     self.wait_timer = 0.0
-                    # ✅ If this is the last step, complete after waiting
+                    # If this is the last step, complete after waiting
                     if self.current_step == len(self.steps) - 1:
-                        print("\n[Task Sequence] Tasks complete! 🎉\n")
+                        print("\n[Task Sequence] Tasks complete!\n")
                         self.completed = True
                         self.active = False
                 else:

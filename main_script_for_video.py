@@ -90,35 +90,8 @@ def control_callback(model_, data_):
 
 mj.set_mjcb_control(control_callback)
 
-# --- Define two virtual cameras at opposite ends of the table ---
-# cam_custom1 = mj.MjvCamera()
-# cam_custom2 = mj.MjvCamera()
-# cam_custom3 = mj.MjvCamera()
-# mj.mjv_defaultCamera(cam_custom1)
-# mj.mjv_defaultCamera(cam_custom2)
-# mj.mjv_defaultCamera(cam_custom3)
-
-# Camera 1: +X end of table, looking at origin
-# cam_custom1.lookat = np.array([0.0, 0.0, 1.0])  # look at center
-# cam_custom1.distance = 2.0                        # distance from lookat
-# cam_custom1.azimuth = 0                           # +X side
-# cam_custom1.elevation = -20                        # slight downward tilt
-
-# # Camera 2: -X end of table, looking at origin
-# cam_custom2.lookat = np.array([0.0, 0.0, 1.0])
-# cam_custom2.distance = 2.0
-# cam_custom2.azimuth = 180                          # -X side
-# cam_custom2.elevation = -20
-
-# # Camera 3: center
-# cam_custom3.lookat = np.array([0.0, 0.0, 1.0])  # look at center
-# cam_custom3.distance = 3.0                        # distance from lookat
-# cam_custom3.azimuth = 90                          # +X side
-# cam_custom3.elevation = -20                        # slight downward tilt
-
 renderer1 = mj.Renderer(model, width=width, height=height)
 renderer2 = mj.Renderer(model, width=width, height=height)
-#renderer3 = mj.Renderer(model, width=width, height=height)
 
 def render_camera(camera_name):
     renderer_tmp = mj.Renderer(model, width=width, height=height)
@@ -144,14 +117,10 @@ while not glfw.window_should_close(window):
     glfw.swap_buffers(window)
     glfw.poll_events()
 
-    # rgb1 = render_camera(cam_custom1)
-    # rgb2 = render_camera(cam_custom2)
-    # rgb3 = render_camera(cam_custom3)
     rgb1 = render_camera("iso_cam1")
     rgb2 = render_camera("iso_cam2")
 
     # Combine side by side
-    # combined = np.concatenate([rgb1, rgb3, rgb2], axis=1)
     combined = np.concatenate([rgb2,rgb1], axis=1)
     frames.append(combined)
 
@@ -165,4 +134,4 @@ renderer2.close()
 # --- Save recorded video ---
 output_path = os.path.join(dirname, "Recording.mp4")
 imageio.mimsave(output_path, frames, fps=60)
-print(f"🎥 Three-view simulation video saved to: {output_path}")
+print(f"Simulation video saved to: {output_path}")
