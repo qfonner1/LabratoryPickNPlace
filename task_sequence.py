@@ -1,6 +1,9 @@
 import numpy as np
 import Functions as F 
 from path_planner import path_planner
+from saving_config import BASE_OUTPUT_DIR
+import saving_config
+import os
 
 
 class TaskSequence:
@@ -120,6 +123,48 @@ class TaskSequence:
         return pos, rot
     
 
+    def plot_path_with_orientations(self, substeps, show_orientations=False):
+        import matplotlib.pyplot as plt
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Extract positions and rotations
+        positions = np.array([s["pos"] for s in substeps])
+        rotations = [s["rot"] for s in substeps]
+
+        # Compute approximate path size
+        bbox_diag = np.linalg.norm(positions.max(axis=0) - positions.min(axis=0))
+        scale = bbox_diag * 0.075  # axes are 5% of path length
+
+        # Plot path line
+        ax.plot(positions[:,0], positions[:,1], positions[:,2], 'k-', label="EE Path")
+
+        # Plot coordinate frames along the path
+        for i, (pos, R) in enumerate(zip(positions, rotations)):
+            x_axis = pos + R[:,0]*scale
+            y_axis = pos + R[:,1]*scale
+            z_axis = pos + R[:,2]*scale
+
+            ax.plot([pos[0], x_axis[0]], [pos[1], x_axis[1]], [pos[2], x_axis[2]], 'r')
+            ax.plot([pos[0], y_axis[0]], [pos[1], y_axis[1]], [pos[2], y_axis[2]], 'g')
+            ax.plot([pos[0], z_axis[0]], [pos[1], z_axis[1]], [pos[2], z_axis[2]], 'b')
+
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.set_title('EE Path with Orientations')
+        ax.legend()
+        if show_orientations is True:
+            plt.show()
+
+        # Save PNG
+        saving_config.ORI_COUNTER += 1
+        plot_filename = os.path.join(BASE_OUTPUT_DIR, f"orientations_{saving_config.PLOT_COUNTER}.png")
+        fig.savefig(plot_filename)
+        print(f"[Path Planner] Plot saved to: {plot_filename}")
+        plt.close(fig)
+
+
     def _create_substeps_between(self, start_pos, start_rot, end_pos, end_rot, end_gripper, end_pos_tol, max_waypoints):
         """
         Create intermediate substeps between start and end positions/rotations.
@@ -216,6 +261,8 @@ class TaskSequence:
             dist = np.linalg.norm(ee_pos - target_pos)
             tol_type = step.get("pos_tol")
             pos_tol = 0.01 if tol_type == "tight" else 0.2 if tol_type == "loose" else 0.03
+            R_diff = ee_rot.T @ target_rot
+            angle_deg = np.degrees(np.arccos(np.clip((np.trace(R_diff)-1)/2, -1.0, 1.0)))
 
             if dist < pos_tol:
                 self.substep_idx += 1
@@ -224,7 +271,10 @@ class TaskSequence:
                     self.substeps = []
                     self.substep_idx = 0
 
-            print(f"[Task Sequence] Substep {self.substep_idx}/{len(self.substeps)} | Dist: {dist:.3f}", flush=True)
+            print(f"[Task Sequence] Substep {self.substep_idx}/{len(self.substeps)} | EE Pos: [{', '.join(f'{x:.3f}' for x in ee_pos)}] "
+                f"| Target Pos: [{', '.join(f'{x:.3f}' for x in target_pos)}] "
+                f"| Dist: {dist:.3f} ", flush=True)
+            
             return target_pos, target_rot, gripper_targets, gripper_open
 
         # Main step handling
@@ -259,6 +309,7 @@ class TaskSequence:
                 next_gripper = next_step.get("gripper", 0.0)
                 end_pos_tol = next_step.get("pos_tol")
                 self.substeps = self._create_substeps_between(target_pos, target_rot, next_pos, next_rot, next_gripper, end_pos_tol, max_waypoints=20)
+                self.plot_path_with_orientations(self.substeps)
                 self.substep_idx = 0
                 if not self.substeps:
                     # fallback if planning fails

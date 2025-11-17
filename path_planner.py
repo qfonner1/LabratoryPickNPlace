@@ -314,9 +314,6 @@ def path_plot(rrt_path, shortcut_path, rounded_path, final_path, start, goal, sh
                     name='Obstacle',
                 ))
 
-
-
-
         # Paths
         fig_html.add_trace(go.Scatter3d(x=rrt_path[:,0], y=rrt_path[:,1], z=rrt_path[:,2],
                                         mode='lines', line=dict(color='black', width=4), name='RRT* Path'))
@@ -354,13 +351,3 @@ def path_plot(rrt_path, shortcut_path, rounded_path, final_path, start, goal, sh
         fig_html.write_html(html_filename)
         print(f"[Path Planner] Interactive HTML plot saved to: {html_filename}")
 
-
-
-
-# ---------------- MAIN ----------------
-# if __name__ == "__main__":
-#     start_list = [-0.9, 0, 1.33]
-#     end_list   = [0.9, 0, 1.33]
-
-#     final_path = path_planner(start=start_list, goal=end_list, max_retries=20, show_animation=True)
-#     print(f"✅ Generated {len(final_path)} waypoints in final path.")

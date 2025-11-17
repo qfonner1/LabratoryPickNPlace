@@ -72,13 +72,10 @@ def quat_slerp(q0, q1, t, long_path):
         return q0  # No meaningful rotation, return start
     
     # If long_path is requested, flip to take the long route
-    if long_path and dot > 0.0:
-        q1 = -q1
-        dot = -dot
-    # Standard short path if not long_path
-    # elif not long_path and dot < 0.0:
+    # if long_path == True:
     #     q1 = -q1
     #     dot = -dot
+
     
     dot = np.clip(dot, -1.0, 1.0)
     DOT_THRESH = 0.9995

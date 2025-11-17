@@ -10,3 +10,6 @@ PLOT_COUNTER = 0
 
 # Object detection counter
 CAPTURE_COUNTER = 0
+
+# orientation counter
+ORI_COUNTER = 0

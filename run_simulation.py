@@ -72,15 +72,18 @@ def get_body_position(model, data, body_name):
     pos = data.xpos[body_id].copy()  # (x, y, z)
     return pos
 
-object_pos = get_body_position(env.model, env.data, "box1")[:2]
-target_pos = get_body_position(env.model, env.data, "target1")[:2]
-print("Object position:", object_pos)
-print("Target position:", target_pos)
+pairs = [("box1", "target1"),
+         ("box2", "target2"),
+         ("box3", "target3")]
 
-error = np.linalg.norm(object_pos - target_pos)
-print(f"Distance to target: {error:.3f} meters")
-axis_error = object_pos - target_pos
-print("Error by axis:", axis_error)
+for obj_name, tgt_name in pairs:
+    object_pos = get_body_position(env.model, env.data, obj_name)[:2]
+    target_pos = get_body_position(env.model, env.data, tgt_name)[:2]
+
+    error = np.linalg.norm(object_pos - target_pos)
+    axis_error = object_pos - target_pos
+
+    print(f"[Run Simulation] Pair: {obj_name} → {tgt_name} | Object position: {object_pos} | Target position: {target_pos} | Distance to target: {error:.3f} meters")
 
 # --- After simulation ---
 sys.stdout.log.close()    # close file safely
