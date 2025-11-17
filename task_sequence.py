@@ -165,7 +165,7 @@ class TaskSequence:
         angle = np.arccos(np.clip(cos_angle, -1.0, 1.0))
 
         # Determine long_path
-        long_path = angle < (np.pi / 2)
+        long_path = angle > (np.pi / 2)
 
         print(f"[Task Sequence] Initial tangent angle: {np.degrees(angle):.2f} deg, long_path: {long_path}")
 

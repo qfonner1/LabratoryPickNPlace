@@ -4,11 +4,18 @@ import object_detection as OD
 import time
 from saving_config import BASE_OUTPUT_DIR 
 import numpy as np
+from logger import Logger
+import sys
 
 # ------------------------------
 # Output Saving
 # ------------------------------
+# --- Usage in your simulation ---
+log_file = "sim_output.txt"
+sys.stdout = Logger(log_file)
+sys.stderr = sys.stdout  # also capture errors
 print(f"[Run Simulation] All outputs will be saved to: {BASE_OUTPUT_DIR}")
+print("[Run Simulation] Simulation starting...")
 
 # ------------------------------
 # Object Detection
@@ -74,3 +81,8 @@ error = np.linalg.norm(object_pos - target_pos)
 print(f"Distance to target: {error:.3f} meters")
 axis_error = object_pos - target_pos
 print("Error by axis:", axis_error)
+
+# --- After simulation ---
+sys.stdout.log.close()    # close file safely
+sys.stdout = sys.__stdout__  # restore original stdout
+sys.stderr = sys.__stderr__  # restore stderr
