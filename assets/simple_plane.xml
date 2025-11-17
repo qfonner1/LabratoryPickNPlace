@@ -37,10 +37,16 @@
 
     <!-- Standing cam view (Mirrored Version) -->
     <camera pos="-2.55 0 2.25" name="standing_cam2" fovy="45" xyaxes="0.000 -1.000 -0.000 0.618 0.000 0.786"/>
+
+    <!-- overhead cameras -->
     <camera name="overhead_cam" pos="-0.8 0.0 2" fovy="50"/>
     <light name="overhead_light" pos="-0.8 0 2.0" dir="0 0 -1" diffuse="0.8 0.8 0.8" specular="0.2 0.2 0.2" />
     <camera name="overhead_cam2" pos="0.8 0.0 2" fovy="50"/>
     <light name="overhead_light2" pos="0.8 0 2.0" dir="0 0 -1" diffuse="0.8 0.8 0.8" specular="0.2 0.2 0.2" />
+
+    <!-- iso cameras -->
+    <camera pos="2.55 1.0 2.5" name="iso_cam1" xyaxes="-0.500 1.000 0.000 -0.62 0.000 0.78"/>
+    <camera pos="-2.55 -1.0 2.5" name="iso_cam2" xyaxes="0.500 -1.000 0.000 0.62 0.000 0.78"/>
 
 
   </worldbody>

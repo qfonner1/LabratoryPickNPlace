@@ -11,13 +11,18 @@ import plotly.graph_objects as go
 
 # ---------------- PARAMETERS ----------------
 padding = 0.075
+wall_padding = 0.02
 obstacles = [
     (-0.8, 0.0, 0.52, 0.2+padding, 0.4+padding, 0.52),
     (0.8, 0.0, 0.52, 0.2+padding, 0.4+padding, 0.52),
     (0.0, 0.0, 0.5, 0.2+padding, 0.15+padding, 0.5),
     (0.0, 0.0, 1.5, 0.2+padding, 0.4+padding, 0.5),
     (0,1.0,1,0.2,0.5,1),
-    (0,-1.0,0.6,0.2,0.5,0.6),
+    #(0,-1.0,1.9,0.2,0.5,0.6),
+    #(0,-1.0,0.6,0.2,0.5,0.6),
+    #(0,-1.0,1.8,0.2,0.5,0.2)
+    (-0.3,-0.75,0.65,0.05+wall_padding,0.25+wall_padding,0.65+wall_padding),
+    (0.3,-0.75,1.7,0.05+wall_padding,0.25+wall_padding,0.3+wall_padding)
 ]
 
 rand_area = [-1, 1]
@@ -314,11 +319,13 @@ def path_plot(rrt_path, shortcut_path, rounded_path, final_path, start, goal, sh
 
         # Paths
         fig_html.add_trace(go.Scatter3d(x=rrt_path[:,0], y=rrt_path[:,1], z=rrt_path[:,2],
-                                        mode='lines', line=dict(color='black', width=4), name='RRT* path'))
+                                        mode='lines', line=dict(color='black', width=4), name='RRT* Path'))
         fig_html.add_trace(go.Scatter3d(x=shortcut_path[:,0], y=shortcut_path[:,1], z=shortcut_path[:,2],
-                                        mode='lines', line=dict(color='blue', width=6), name='Shortcut path'))
+                                        mode='lines', line=dict(color='blue', width=6), name='Shortcut Path'))
+        fig_html.add_trace(go.Scatter3d(x=rounded_path[:,0], y=rounded_path[:,1], z=rounded_path[:,2],
+                                        mode='lines', line=dict(color='yellow', width=6), name='Rounded Path'))
         fig_html.add_trace(go.Scatter3d(x=final_path[:,0], y=final_path[:,1], z=final_path[:,2],
-                                        mode='lines', line=dict(color='red', width=8), name='Final path'))
+                                        mode='lines', line=dict(color='red', width=8), name='Final Path'))
 
         # Start and goal
         fig_html.add_trace(go.Scatter3d(x=[start[0]], y=[start[1]], z=[start[2]],
