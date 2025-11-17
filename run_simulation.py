@@ -5,13 +5,13 @@ import time
 from saving_config import BASE_OUTPUT_DIR 
 import numpy as np
 from logger import Logger
-import sys
+import sys, os
 
 # ------------------------------
 # Output Saving
 # ------------------------------
 # --- Usage in your simulation ---
-log_file = "sim_output.txt"
+log_file = os.path.join(BASE_OUTPUT_DIR, "sim_output.txt")
 sys.stdout = Logger(log_file)
 sys.stderr = sys.stdout  # also capture errors
 print(f"[Run Simulation] All outputs will be saved to: {BASE_OUTPUT_DIR}")
