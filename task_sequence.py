@@ -99,11 +99,17 @@ class TaskSequence:
                 {"target_id": target_key, "offset": np.array([-0.1,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 1.0}
             ]
 
-        self.steps = steps
-        self.current_step = 0
-        self.waiting = False
-        self.wait_timer = 0.0
-        print(f"[Task Sequence] Steps regenerated for {len(boxes)} boxes with color matching.")
+        if steps:
+            self.steps = steps
+            self.current_step = 0
+            self.waiting = False
+            self.wait_timer = 0.0
+            print(f"[Task Sequence] Steps regenerated for {len(boxes)} boxes with color matching.")
+        else:
+            print("[Task Sequence] ⚠️ No valid boxes with targets to pick. Sequence will end.")
+            self.steps = []
+            self.completed = True
+            self.active = False
 
     # --------------------------
     # New: Plan and insert substeps (waypoints)
@@ -238,6 +244,12 @@ class TaskSequence:
     # Get next target for robot
     # --------------------------
     def get_target(self, model, data, ee_pos, ee_rot=None):
+        # Early return if sequence inactive, completed, or no steps
+        if not self.active or self.completed or len(self.steps) == 0:
+            gripper_targets = {"left": 0.0, "right": 0.0}
+            print("[Task Sequence] No active steps. Holding current pose / gripper closed.")
+            return ee_pos, ee_rot, gripper_targets, 0.0
+        
         if ee_rot is None:
             ee_rot = np.eye(3)
 

@@ -21,8 +21,8 @@ obstacles = [
     #(0,-1.0,1.9,0.2,0.5,0.6),
     #(0,-1.0,0.6,0.2,0.5,0.6),
     #(0,-1.0,1.8,0.2,0.5,0.2)
-    (-0.3,-0.75,0.65,0.05+wall_padding,0.25+wall_padding,0.65+wall_padding),
-    (0.3,-0.75,1.7,0.05+wall_padding,0.25+wall_padding,0.3+wall_padding)
+    (-0.3,-0.75,0.65,0.05+wall_padding,0.25+wall_padding,0.65+padding),
+    (0.3,-0.75,1.7,0.05+wall_padding,0.25+wall_padding,0.3+padding)
 ]
 
 rand_area = [-1, 1]

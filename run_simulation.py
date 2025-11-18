@@ -4,7 +4,7 @@ import object_detection as OD
 import time
 from saving_config import BASE_OUTPUT_DIR 
 import numpy as np
-from logger import Logger
+from data_logger import Logger
 import sys, os
 
 # ------------------------------
