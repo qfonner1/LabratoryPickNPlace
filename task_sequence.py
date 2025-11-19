@@ -104,7 +104,7 @@ class TaskSequence:
             self.current_step = 0
             self.waiting = False
             self.wait_timer = 0.0
-            print(f"[Task Sequence] Steps regenerated for {len(boxes)} boxes with color matching.")
+            print(f"[Task Sequence] Steps regenerated for boxes with color matching.")
         else:
             print("[Task Sequence] ⚠️ No valid boxes with targets to pick. Sequence will end.")
             self.steps = []

@@ -1,11 +1,25 @@
 import mujoco as mj
 from mujoco.glfw import glfw
 import numpy as np
-import os
+import os, sys
 import imageio
 from robot_controller_OSC import RobotController
 from task_sequence import TaskSequence
 import object_detection as OD
+from saving_config import BASE_OUTPUT_DIR 
+from data_logger import Logger
+
+# ------------------------------
+# Output Saving
+# ------------------------------
+# --- Usage in your simulation ---
+log_file = os.path.join(BASE_OUTPUT_DIR, "sim_output.txt")
+sys.stdout = Logger(log_file)
+sys.stderr = sys.stdout  # also capture errors
+print(f"[Run Simulation] All outputs will be saved to: {BASE_OUTPUT_DIR}")
+print("[Run Simulation] Simulation starting...")
+
+
 
 xml_path = 'franka_panda_w_objs.xml'
 simend = 500  # seconds
@@ -135,3 +149,33 @@ renderer2.close()
 output_path = os.path.join(dirname, "Recording.mp4")
 imageio.mimsave(output_path, frames, fps=60)
 print(f"Simulation video saved to: {output_path}")
+
+
+# ------------------------------
+# Final Stats
+# ------------------------------
+
+# Get body position by name
+def get_body_position(model, data, body_name):
+    body_id = model.body(body_name).id
+    pos = data.xpos[body_id].copy()  # (x, y, z)
+    return pos
+
+pairs = [("box1", "target1"),
+         ("box2", "target2"),
+         ("box3", "target3"),
+         ("box4", "target4")]
+
+for obj_name, tgt_name in pairs:
+    object_pos = get_body_position(model, data, obj_name)[:2]
+    target_pos = get_body_position(model, data, tgt_name)[:2]
+
+    error = np.linalg.norm(object_pos - target_pos)
+    axis_error = object_pos - target_pos
+
+    print(f"[Run Simulation] Pair: {obj_name} → {tgt_name} | Object position: {object_pos} | Target position: {target_pos} | Distance to target: {error:.3f} meters")
+
+# --- After simulation ---
+sys.stdout.log.close()    # close file safely
+sys.stdout = sys.__stdout__  # restore original stdout
+sys.stderr = sys.__stderr__  # restore stderr

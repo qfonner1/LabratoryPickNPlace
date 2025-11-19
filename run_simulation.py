@@ -74,7 +74,8 @@ def get_body_position(model, data, body_name):
 
 pairs = [("box1", "target1"),
          ("box2", "target2"),
-         ("box3", "target3")]
+         ("box3", "target3"),
+         ("box4", "target4")]
 
 for obj_name, tgt_name in pairs:
     object_pos = get_body_position(env.model, env.data, obj_name)[:2]

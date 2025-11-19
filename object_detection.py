@@ -25,9 +25,9 @@ def object_detection(xml_path, cam_name):
     "red_box":    {"ref_rgb": (255, 0, 0),     "tol": 0},
     "green_box":  {"ref_rgb": (0, 255, 0),     "tol": 0},
     "blue_box":   {"ref_rgb": (0, 0, 255),     "tol": 0},
-    "orange_box": {"ref_rgb": (255, 165, 0),   "tol": 0},  # Approximate RGB for Orange
-    "yellow_box": {"ref_rgb": (255, 255, 0),   "tol": 0},  # Approximate RGB for Yellow
-    "purple_box": {"ref_rgb": (128, 0, 128),   "tol": 0},  # Approximate RGB for Purple
+    "orange_box": {"ref_rgb": (255, 165, 0),   "tol": 0},  
+    "yellow_box": {"ref_rgb": (255, 255, 0),   "tol": 0},  
+    "purple_box": {"ref_rgb": (128, 0, 128),   "tol": 0},  
 }
 
     GRID = 48
@@ -401,5 +401,22 @@ def object_detection(xml_path, cam_name):
     Image.fromarray(annotated).save(os.path.join(BASE_OUTPUT_DIR, f"overhead_rgb_annotated_{saving_config.CAPTURE_COUNTER}.png"))
     print("[Object Detection] Saved: overhead_rgb_annotated.png. Done.")
 
-    return results_by_color_shifted
+    target_point = np.array([0.0, 0.0, 1.1], dtype=float)
+
+    sorted_results = {}
+
+    for cname, pts in results_by_color_shifted.items():
+        if not pts:
+            sorted_results[cname] = []
+            continue
+
+        # Compute distances to target point
+        dists = [np.linalg.norm(np.array(p) - target_point) for p in pts]
+
+        # Sort by distance
+        pts_sorted = [pt for (_, pt) in sorted(zip(dists, pts), key=lambda x: x[0])]
+
+        sorted_results[cname] = pts_sorted
+
+    return sorted_results
 
