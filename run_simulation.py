@@ -22,7 +22,7 @@ print("[Run Simulation] Simulation starting...")
 # ------------------------------
 print("[Run Simulation] Running object detection...")
 detected_objects = OD.object_detection("franka_panda_w_objs.xml", "overhead_cam")
-detected_targets=OD.object_detection("franka_panda_w_objs.xml", "overhead_cam2")
+detected_targets = OD.object_detection("franka_panda_w_objs.xml", "overhead_cam2")
 # ------------------------------
 # Initialize environment
 # ------------------------------
@@ -31,10 +31,10 @@ env.model.opt.integrator = 1  # Runge-Kutta 4
 
 env.task_seq.set_boxes_from_vision(detected_objects)
 env.task_seq.set_targets_from_vision(detected_targets)
+env.task_seq.generate_steps()
 
-# Generate dynamic steps based on current EE position
 ee_pos = env.get_ee_position()  
-env.task_seq.generate_steps(ee_pos)
+
 print("[Run Simulation] Targets updated from vision!")
 
 obs = env.reset()
@@ -51,7 +51,7 @@ try:
             print("[Run Simulation] Sequence complete!")
             break
 
-        # Small sleep to match simulation timestep
+        # Small sleep to match simulation timesteps
         time.sleep(env.dt)
 
 except KeyboardInterrupt:
@@ -73,9 +73,7 @@ def get_body_position(model, data, body_name):
     return pos
 
 pairs = [("box1", "target1"),
-         ("box2", "target2"),
-         ("box3", "target3"),
-         ("box4", "target4")]
+         ("box2", "target2")]
 
 for obj_name, tgt_name in pairs:
     object_pos = get_body_position(env.model, env.data, obj_name)[:2]

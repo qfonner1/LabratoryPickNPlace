@@ -7,6 +7,9 @@ class RobotController:
     def __init__(self, ee_site_id, model):
         self.ee_site_id = ee_site_id
         self.tau_prev = None  # For torque rate limiting
+        self.object_grasped_flag = False   # True if gripper is holding object
+        self.mass_blend = 0.0              # Smooth blending factor for mass compensation
+        self.object_mass = 0.01           # Default object mass, can be changed
 
         # Identify geometry IDs once (used for potential collision or grasp logic)
         self.object_geom_id = model.geom("box_geom").id
@@ -66,15 +69,33 @@ class RobotController:
         # --- Task-space PD control law ---
         F_task = Kp_task @ error - Kd_task @ xdot  # desired EE force/torque
 
+        # Update mass blending factor based on gripper state
+        if gripper_open == 0.0:  # Gripper closed -> object grasped
+            if not self.object_grasped_flag:
+                self.object_grasped_flag = True
+            self.mass_blend = min(self.mass_blend + 0.01, 1.0)  # smooth blend in
+        else:  # Gripper open -> object released
+            if self.object_grasped_flag:
+                self.object_grasped_flag = False
+            self.mass_blend = max(self.mass_blend - 0.01, 0.0)  # smooth blend out
+
         # --- Map task-space forces to joint torques via Jacobian transpose ---
         tau_task = J_full.T @ (Lambda @ F_task)
 
         # --- Add gravity & Coriolis compensation ---
-        tau = tau_task + data.qfrc_bias  # ensures dynamics are compensated
+        tau = tau_task + data.qfrc_bias  # tau is defined here
 
         # --- Gripper PD control ---
         tau[7] = 200 * (gripper_targets["left"] - q[7]) - 10 * qd[7]
         tau[8] = 200 * (gripper_targets["right"] - q[8]) - 10 * qd[8]
+
+        # --- Add mass compensation ---
+        if self.mass_blend > 0:
+            gravity = model.opt.gravity
+            f_gravity = -self.object_mass * gravity  # negative to lift
+            wrench = np.hstack((f_gravity, np.zeros(3)))
+            tau += self.mass_blend * (J_full.T @ wrench)
+
 
         # --- Torque rate limiting ---
         if self.tau_prev is None:

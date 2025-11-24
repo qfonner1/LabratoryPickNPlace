@@ -57,7 +57,7 @@ task_seq.set_boxes_from_vision(detected_objects)
 task_seq.set_targets_from_vision(detected_targets)
 
 ee_pos = data.site_xpos[ee_site_id].copy()  
-task_seq.generate_steps(ee_pos)
+task_seq.generate_steps()
 
 # --- Initialize GLFW ---
 if not glfw.init():
@@ -162,9 +162,7 @@ def get_body_position(model, data, body_name):
     return pos
 
 pairs = [("box1", "target1"),
-         ("box2", "target2"),
-         ("box3", "target3"),
-         ("box4", "target4")]
+         ("box2", "target2")]
 
 for obj_name, tgt_name in pairs:
     object_pos = get_body_position(model, data, obj_name)[:2]

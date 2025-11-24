@@ -58,46 +58,141 @@ class TaskSequence:
             for i, p in enumerate(pts):
                 print(f"  {key}[{i}] -> {p}")
 
+        print(self.targets)
+
     # --------------------------
     # Generate steps dynamically
     # --------------------------
-    def generate_steps(self, ee_pos):
-        boxes = [(k, np.array(p[0])) for k, p in self.targets.items() if k.endswith("_box")]
+    def generate_steps(self):
+        boxes = []
+        for k, points in self.targets.items():
+            if k.endswith("_box"):
+                for idx, pt in enumerate(points):
+                    # Add index to preserve uniqueness
+                    box_key = f"{k}[{idx}]" if len(points) > 1 else k
+                    boxes.append((box_key, np.array(pt)))
+        print(f"[Debug] Detected boxes: {boxes}")
+
         if len(boxes) == 0:
             print("[Task Sequence] No boxes detected yet.")
             return
-
+        
         # Sort boxes by distance to end-effector
-        boxes.sort(key=lambda x: np.linalg.norm(x[1] - ee_pos))
+        ref_point = np.array([0.0, 0.0, 1.08])
+        boxes.sort(key=lambda x: np.linalg.norm(x[1] - ref_point))
+        print(f"[Debug] Boxes sorted by distance to {ref_point}: {boxes}")
+
+        # Group boxes by color
+        color_groups = {}
+        for k, pos in boxes:
+            color = k.split('_box')[0]  # grouping by 'blue', 'green', etc.
+            if color not in color_groups:
+                color_groups[color] = []
+            color_groups[color].append((k, pos))  # keep full key for each unique box
+        print(f"[Debug] Color groups formed: { {c:[b[0] for b in l] for c,l in color_groups.items()} }")
 
         steps = []
 
-        for box_key, box_pos in boxes:
-            color = box_key.replace("_box", "")
-            target_key = f"{color}_target"
+        for color, box_list in color_groups.items():
+            target_key_base = f"{color}_target"  # original target id without index
+            print(f"[Debug] Processing color '{color}' with boxes {[b[0] for b in box_list]} and target '{target_key_base}'")
 
-            # --- Only proceed if matching target exists ---
-            if target_key not in self.targets:
-                print(f"[Task Sequence] ⚠️ No target for {box_key} → skipping.")
+            if target_key_base not in self.targets:
+                print(f"[Task Sequence] ⚠️ No target for {color}_box → skipping.")
                 continue
 
-            # --- Pick up box ---
-            steps += [
-                {"target_id": box_key, "offset": np.array([0.05,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "loose"},
-                {"target_id": box_key, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0,  "pos_tol": "tight"},
-                {"target_id": box_key, "offset": np.array([0,0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
-                {"target_id": box_key, "offset": np.array([0,0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0},
-                {"target_id": box_key, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0},
-            ]
+            if len(box_list) == 1:
+                box_key, box_pos = box_list[0]
+                pickup_id = box_key  
+                place_id = target_key_base  
+                print(f"[Task Sequence] Single box for color {color}")
 
-            # --- Place box on corresponding target (dynamic live reference) ---
-            steps += [
-                {"target_id": target_key, "offset": np.array([-0.05,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "loose"},
-                {"target_id": target_key, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
-                {"target_id": target_key, "offset": np.array([0,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
-                {"target_id": target_key, "offset": np.array([0,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 1.0},
-                {"target_id": target_key, "offset": np.array([-0.1,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 1.0}
-            ]
+                # --- Pick up box ---
+                steps += [
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0.05,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "loose"},
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0,  "pos_tol": "tight"},
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0},
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0},
+                ]
+
+                # --- Place box on corresponding target (dynamic live reference) ---
+                steps += [
+                    {"target_id": place_id, "idx": 0, "offset": np.array([-0.05,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "loose"},
+                    {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 1.0},
+                    {"target_id": place_id, "idx": 0, "offset": np.array([-0.1,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 1.0}
+                ]
+            
+            else:
+                # --- Multiple boxes  ---
+                print(f"[Debug] Detected {len(box_list)} boxes for color '{color}' → should trigger stacking")
+                first_box_key, first_box_pos = box_list[0]
+                first_box_key = first_box_key.split('[')[0]
+
+                second_box_key, second_box_pos = box_list[1]
+                second_box_key = second_box_key.split('[')[0]
+                
+                pickup_id = first_box_key
+                pickup_id_2 = second_box_key
+                place_id = target_key_base
+
+                print(f"[Task Sequence] Two boxes for color '{color}', creating reorienting steps: {pickup_id}, {pickup_id_2}")
+
+
+                steps += [
+                    # pick first box
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0.05,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "loose"},
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0,  "pos_tol": "tight"},
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    # reposition first box in front of second
+                    {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.04,0.0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.02,0.0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.02,0.0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.005,0.0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.005,0.0,0.01]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.005,0.0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    # pick up both boxes and transport
+                    {"target_id": place_id, "idx": 0, "offset": np.array([-0.05,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "loose"},
+                    {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                    {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 1.0},
+                    {"target_id": place_id, "idx": 0, "offset": np.array([-0.1,0,0.02]), "rot": F.RotX(np.pi/2) @ F.RotY(np.pi/2), "gripper": 1.0, "wait": 1.0}
+                ]
+
+                # pick first box
+                # steps += [
+                #     {"target_id": pickup_id, "idx": 0, "offset": np.array([0.0,0,0.15]), "rot": F.RotX(np.pi) @ F.RotZ(np.pi), "gripper": 1.0, "wait": 1.0, "pos_tol": "loose"},
+                #     {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.07]), "rot": F.RotX(np.pi) @ F.RotZ(np.pi), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+                #     {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.07]), "rot": F.RotX(np.pi) @ F.RotZ(np.pi), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                #     {"target_id": pickup_id, "idx": 0, "offset": np.array([0,0,0.15]), "rot": F.RotX(np.pi) @ F.RotZ(np.pi), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"}]
+                # # reposition first box next to second
+                # steps += [
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0,-0.05,0.15]), "rot":  F.RotX(np.pi) @ F.RotZ(np.pi), "gripper": 0.0, "wait": 1.0,  "pos_tol": "tight"},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0,-0.05,0.08]), "rot":  F.RotX(np.pi) @ F.RotZ(np.pi), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0,-0.05,0.08]), "rot":  F.RotX(np.pi) @ F.RotZ(np.pi), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0,-0.05,0.15]), "rot":  F.RotX(np.pi) @ F.RotZ(np.pi), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"}]
+                # # pick up both boxes
+                # steps += [
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.1, -0.02,0.10]), "rot": F.RotX(np.pi/2) @ F.RotY(-np.pi/2) @ F.RotZ(np.pi), "gripper": 1.0, "wait": 1.0},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.1, -0.02,0.10]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0, -0.02,0.10]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0,  "pos_tol": "tight"},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0, -0.02,0.01]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2), "gripper": 1.0, "wait": 1.0, "pos_tol": "tight"},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0, -0.02,0.01]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0, -0.02,0.10]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0},
+                #     {"target_id": pickup_id_2, "idx": 1, "offset": np.array([0.3, -0.02,0.10]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2), "gripper": 0.0, "wait": 1.0}]
+                # # # take both bpxes to target
+                # steps += [
+                #     {"target_id": place_id, "idx": 0, "offset": np.array([-0.05,0,0.10]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2) @ F.RotZ(np.pi), "gripper": 0.0, "wait": 1.0, "pos_tol": "loose"},
+                #     {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.10]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2) @ F.RotZ(np.pi), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                #     {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.02]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2) @ F.RotZ(np.pi), "gripper": 0.0, "wait": 1.0, "pos_tol": "tight"},
+                #     {"target_id": place_id, "idx": 0, "offset": np.array([0,0,0.02]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2) @ F.RotZ(np.pi), "gripper": 1.0, "wait": 1.0},
+                #     {"target_id": place_id, "idx": 0, "offset": np.array([-0.1,0,0.02]), "rot": F.RotX(-np.pi/2) @ F.RotY(-np.pi/2) @ F.RotZ(np.pi), "gripper": 1.0, "wait": 1.0}]
+
+                    
 
         if steps:
             self.steps = steps
@@ -121,7 +216,8 @@ class TaskSequence:
         else:
             target_id = step["target_id"]
             if target_id in self.targets and len(self.targets[target_id]) > 0:
-                pos = np.array(self.targets[target_id][0]) + step.get("offset", np.zeros(3))
+                idx = step.get("idx", 0)
+                pos = np.array(self.targets[target_id][idx]) + step.get("offset", np.zeros(3))
             else:
                 # fallback
                 pos = np.array(step.get("pos", np.zeros(3)))
@@ -298,7 +394,8 @@ class TaskSequence:
         if target_id is None and "pos" in step:
             base_pos = np.array(step["pos"], dtype=np.float64)
         elif target_id in self.targets and len(self.targets[target_id]) > 0:
-            base_pos = np.array(self.targets[target_id][0], dtype=np.float64)
+            idx = step.get("idx", 0)
+            base_pos = np.array(self.targets[target_id][idx], dtype=np.float64)
         else:
             base_pos = ee_pos.copy()
 
