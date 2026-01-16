@@ -1,10 +1,10 @@
 import time
-from robot_env import RobotEnv
-import object_detection as OD
+from modules.robot_env import RobotEnv
+import modules.object_detection as OD
 import time
-from saving_config import BASE_OUTPUT_DIR 
+from utilities.saving_config import BASE_OUTPUT_DIR 
 import numpy as np
-from data_logger import Logger
+from utilities.data_logger import Logger
 import sys, os
 
 # ------------------------------
@@ -21,12 +21,12 @@ print("[Run Simulation] Simulation starting...")
 # Object Detection
 # ------------------------------
 print("[Run Simulation] Running object detection...")
-detected_objects = OD.object_detection("franka_panda_w_objs.xml", "overhead_cam")
-detected_targets = OD.object_detection("franka_panda_w_objs.xml", "overhead_cam2")
+detected_objects = OD.object_detection("Sim_World.xml", "overhead_cam")
+detected_targets = OD.object_detection("Sim_World.xml", "overhead_cam2")
 # ------------------------------
 # Initialize environment
 # ------------------------------
-env = RobotEnv("franka_panda_w_objs.xml", render_mode="human")
+env = RobotEnv("Sim_World.xml", render_mode="human")
 env.model.opt.integrator = 1  # Runge-Kutta 4
 
 env.task_seq.set_boxes_from_vision(detected_objects)
@@ -73,7 +73,8 @@ def get_body_position(model, data, body_name):
     return pos
 
 pairs = [("box1", "target1"),
-         ("box2", "target2")]
+         ("box2", "target3"),
+         ("box3", "target2")]
 
 for obj_name, tgt_name in pairs:
     object_pos = get_body_position(env.model, env.data, obj_name)[:2]
