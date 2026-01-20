@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import interpolate
 import os
-from utilities.saving_config import BASE_OUTPUT_DIR
 import utilities.saving_config as saving_config
 import plotly.graph_objects as go
 
@@ -268,7 +267,7 @@ def path_plot(rrt_path, shortcut_path, rounded_path, final_path, start, goal, sh
 
     # Save PNG
     saving_config.PLOT_COUNTER += 1
-    plot_filename = os.path.join(BASE_OUTPUT_DIR, f"path_{saving_config.PLOT_COUNTER}.png")
+    plot_filename = os.path.join(saving_config.BASE_OUTPUT_DIR, f"path_{saving_config.PLOT_COUNTER}.png")
     fig.savefig(plot_filename)
     print(f"[Path Planner] Plot saved to: {plot_filename}")
     plt.close(fig)
@@ -350,7 +349,7 @@ def path_plot(rrt_path, shortcut_path, rounded_path, final_path, start, goal, sh
             zaxis=dict(range=z_limits),
             aspectmode='cube'  # ensures equal scaling
         ))
-        html_filename = os.path.join(BASE_OUTPUT_DIR, f"path_{saving_config.PLOT_COUNTER}.html")
+        html_filename = os.path.join(saving_config.BASE_OUTPUT_DIR, f"path_{saving_config.PLOT_COUNTER}.html")
         fig_html.write_html(html_filename)
         print(f"[Path Planner] Interactive HTML plot saved to: {html_filename}")
 
