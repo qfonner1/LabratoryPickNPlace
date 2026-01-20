@@ -5,21 +5,19 @@ import OpenGL.GL as gl
 from PIL import Image, ImageDraw
 import cv2
 import os
-from utilities.saving_config import BASE_OUTPUT_DIR
 import utilities.saving_config as saving_config
 
 
 def object_detection(xml_path, cam_name):
-    saving_config.CAPTURE_COUNTER += 1
+
  # --------- User config ---------
+    saving_config.CAPTURE_COUNTER += 1
     XML_PATH = xml_path
     CAM_NAME = cam_name
     WINDOW_SIZE = (1200, 900)
-    USE_CV_CONVENTION = True
-
-    Z_TABLE_FALLBACK = 0.0    # fallback table height (m)
-    Z_ABOVE_TABLE = 0.10        # offset above table (m)
-    USE_HOMOGRAPHY_CALIBRATION = True   # <-- enable table-based mapping
+    Z_OBJECTS = 1.181
+    GRID = 48
+    MIN_PIXELS = 80
 
     COLOR_CLASSES = {
     "red_box":    {"ref_rgb": (255, 0, 0),     "tol": 0},
@@ -30,36 +28,8 @@ def object_detection(xml_path, cam_name):
     "purple_box": {"ref_rgb": (128, 0, 128),   "tol": 0},  
 }
 
-    GRID = 48
-    MIN_PIXELS = 80
-    # --------------------------------
 
-
-    def intrinsics_from_fovy(fovy_deg, width, height):
-        H, W = height, width
-        fovy_rad = np.deg2rad(float(fovy_deg))
-        fy = H / (2.0 * np.tan(fovy_rad / 2.0))
-        fx = fy
-        cx = (W - 1) / 2.0
-        cy = (H - 1) / 2.0
-        return fx, fy, cx, cy
-
-
-    def pixel_to_world_from_depth(u, v, depth_m, W, H, fovy_deg, cam_pos, cam_xmat, use_cv=True):
-        fx, fy, cx, cy = intrinsics_from_fovy(fovy_deg, W, H)
-        x = (u - cx) / fx
-        y = (v - cy) / fy
-        z = 1.0
-        d_cam_cv = np.array([x, y, z], dtype=np.float32)
-        d_cam_cv /= np.linalg.norm(d_cam_cv)
-        if use_cv:
-            d_cam_mj = np.array([d_cam_cv[0], -d_cam_cv[1], -d_cam_cv[2]], dtype=np.float32)
-        else:
-            d_cam_mj = np.array([x, y, -1.0], dtype=np.float32)
-        R = cam_xmat.reshape(3, 3)
-        p_world = cam_pos + (R.T @ d_cam_mj) * depth_m
-        return p_world
-
+    # --------- Helper Functions ---------
 
     def mask_from_ref_hsv(rgb, ref_rgb, hue_tol=15, sat_min=10, val_min=10):
         # Convert image to HSV
@@ -86,7 +56,6 @@ def object_detection(xml_path, cam_name):
 
         mask = hue_mask & sat_mask & val_mask
         return mask
-
 
 
     def centroids_from_mask_grid(mask, grid=48, min_pixels=80):
@@ -150,18 +119,6 @@ def object_detection(xml_path, cam_name):
         return results
 
 
-    def estimate_table_z_from_known_geom(model, data):
-        candidates = ["box_geom", "box_geom2", "box_geom3"]
-        for gname in candidates:
-            gid = mj.mj_name2id(model, mj.mjtObj.mjOBJ_GEOM, gname)
-            if gid >= 0:
-                mj.mj_forward(model, data)
-                z_center = float(data.geom_xpos[gid, 2])
-                z_half = float(model.geom_size[gid, 2])
-                return z_center - z_half
-        return None
-
-
     def render_and_capture(model, data, cam_name, window_size):
         W, H = window_size
         if not glfw.init():
@@ -199,20 +156,11 @@ def object_detection(xml_path, cam_name):
         rgba = np.frombuffer(rgba_bytes, dtype=np.uint8).reshape(fb_h, fb_w, 4)
         rgb = np.flip(rgba[:, :, :3], axis=0).copy()
 
-        depth_bytes = gl.glReadPixels(0, 0, fb_w, fb_h, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT)
-        depth = np.frombuffer(depth_bytes, dtype=np.float32).reshape(fb_h, fb_w)
-        depth = np.flip(depth, axis=0)
-
-        znear, zfar = model.vis.map.znear, model.vis.map.zfar
-        linear_depth = 2.0 * znear * zfar / (zfar + znear - (2.0 * depth - 1.0) * (zfar - znear))
-
-        fovy_deg = float(model.cam_fovy[cam_id])
-        cam_pos = data.cam_xpos[cam_id].copy()
-        cam_xmat = data.cam_xmat[cam_id].copy()
-
         glfw.destroy_window(window)
         glfw.terminate()
-        return rgb, linear_depth, fovy_deg, cam_pos, cam_xmat
+
+        return rgb
+
 
     def order_corners(corners):
         # corners is (4, 2)
@@ -230,7 +178,7 @@ def object_detection(xml_path, cam_name):
         return np.array([bottom_left, bottom_right, top_right, top_left], dtype=np.float32)
 
 
-    def calibrate_homography_from_table(rgb, model, data):
+    def calibrate_homography_from_table(rgb):
         if cam_name=="overhead_cam":
             pos = np.array([-0.8, 0.0])
             size = np.array([0.2, 0.4])
@@ -255,7 +203,7 @@ def object_detection(xml_path, cam_name):
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-        cv2.imwrite(os.path.join(BASE_OUTPUT_DIR, f"table_mask_{saving_config.CAPTURE_COUNTER}.png"), mask)  # save to check visually
+        cv2.imwrite(os.path.join(saving_config.BASE_OUTPUT_DIR, f"table_mask_{saving_config.CAPTURE_COUNTER}.png"), mask)  # save to check visually
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not contours:
@@ -293,7 +241,6 @@ def object_detection(xml_path, cam_name):
         return H
 
 
-
     def draw_annotations(rgb, original_detections, shifted_detections, color_classes, radius=8):
         img = Image.fromarray(rgb)
         draw = ImageDraw.Draw(img)
@@ -317,31 +264,25 @@ def object_detection(xml_path, cam_name):
         return np.array(img)
 
 
+    # --------- Main Object Detection Code ---------
+
     print("[Object Detection] Loading model...")
     model = mj.MjModel.from_xml_path(XML_PATH)
     data = mj.MjData(model)
 
-    z_table = estimate_table_z_from_known_geom(model, data)
-    if z_table is None:
-        z_table = Z_TABLE_FALLBACK
-        print(f"[Object Detection] Table Height Estimation Failed!")
-    else:
-        print(f"[Object Detection] Estimated table height z={z_table:.3f} m")
-
-    z_target = z_table + Z_ABOVE_TABLE
+    z_target = Z_OBJECTS
     print(f"[Object Detection] Using centroid Z = {z_target:.3f} m")
 
     print("[Object Detection] Rendering overhead image and depth map...")
-    rgb, depth_map, fovy_deg, cam_pos, cam_xmat = render_and_capture(model, data, CAM_NAME, WINDOW_SIZE)
-    Image.fromarray(rgb).save(os.path.join(BASE_OUTPUT_DIR, f"overhead_rgb_{saving_config.CAPTURE_COUNTER}.png"))
+    rgb = render_and_capture(model, data, CAM_NAME, WINDOW_SIZE)
+    Image.fromarray(rgb).save(os.path.join(saving_config.BASE_OUTPUT_DIR, f"overhead_rgb_{saving_config.CAPTURE_COUNTER}.png"))
 
-    H_homography = calibrate_homography_from_table(rgb, model, data) if USE_HOMOGRAPHY_CALIBRATION else None
+    H_homography = calibrate_homography_from_table(rgb)
 
     print("[Object Detection] Detecting colors...")
     detections = detect_colors_centroids(rgb, COLOR_CLASSES, grid=GRID, min_pixels=MIN_PIXELS)
     results_by_color_shifted = {}
     results_by_color_original = detections
-    H, W, _ = rgb.shape
 
     for cname, cents in detections.items():
         pts_world_shifted = []
@@ -352,19 +293,7 @@ def object_detection(xml_path, cam_name):
                 XY1 /= XY1[2]
                 X, Y = XY1[0], XY1[1]
                 P = np.array([X, Y, z_target])
-            else:
-                u_i, v_i = int(round(u)), int(round(v))
-                if 0 <= v_i < depth_map.shape[0] and 0 <= u_i < depth_map.shape[1]:
-                    depth_m = float(depth_map[v_i, u_i])
-                    if np.isfinite(depth_m) and depth_m > 0:
-                        P = pixel_to_world_from_depth(
-                            u, v, depth_m, W, H, fovy_deg,
-                            cam_pos=cam_pos, cam_xmat=cam_xmat, use_cv=USE_CV_CONVENTION)
-                        P[2] = z_target
-                    else:
-                        continue  # skip invalid depth point
-                else:
-                    continue  # skip out-of-bounds
+
             if CAM_NAME == "overhead_cam":
                 table_center = np.array([-0.8, 0.0])
                 table_size = np.array([0.2, 0.4])
@@ -375,7 +304,7 @@ def object_detection(xml_path, cam_name):
                 table_center = np.array([-0.8, 0.0])
                 table_size = np.array([0.2, 0.4])
 
-            # --- NEW: Filter points outside table ---
+            # --- Filter points outside table ---
             x_min, x_max = table_center[0] - table_size[0], table_center[0] + table_size[0]
             y_min, y_max = table_center[1] - table_size[1], table_center[1] + table_size[1]
             if not (x_min <= P[0] <= x_max and y_min <= P[1] <= y_max):
@@ -398,7 +327,7 @@ def object_detection(xml_path, cam_name):
             print(f"[Object Detection] {cname}[{i}]  X={P[0]:.4f}, Y={P[1]:.4f}, Z={P[2]:.4f}")
 
     annotated = draw_annotations(rgb, results_by_color_original, results_by_color_shifted, COLOR_CLASSES)
-    Image.fromarray(annotated).save(os.path.join(BASE_OUTPUT_DIR, f"overhead_rgb_annotated_{saving_config.CAPTURE_COUNTER}.png"))
+    Image.fromarray(annotated).save(os.path.join(saving_config.BASE_OUTPUT_DIR, f"overhead_rgb_annotated_{saving_config.CAPTURE_COUNTER}.png"))
     print("[Object Detection] Saved: overhead_rgb_annotated.png. Done.")
 
     target_point = np.array([0.0, 0.0, 1.1], dtype=float)
